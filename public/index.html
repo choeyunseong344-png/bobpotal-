@@ -13,7 +13,6 @@
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- Header -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-6">
@@ -27,19 +26,14 @@
             </div>
 
             <div class="flex items-center space-x-4" id="navAuthArea">
-                <!-- JS 동적 렌더링 -->
-            </div>
+                </div>
         </div>
     </header>
 
-    <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         
-        <!-- HOME VIEW -->
         <div id="viewHome" class="space-y-8">
-            <!-- Top Banner Cards -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Banner 1 -->
                 <div class="bg-amber-400 text-amber-950 p-6 rounded-2xl shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px]">
                     <div>
                         <p class="text-[11px] font-bold uppercase tracking-wider mb-2 opacity-80">DINNER TRANSFER</p>
@@ -51,19 +45,20 @@
                     </p>
                 </div>
 
-                <!-- Banner 2 -->
-                <div class="bg-amber-50 border border-amber-200/60 p-6 rounded-2xl flex flex-col justify-between min-h-[180px]">
+                <div onclick="openMealModal()" class="bg-amber-50 border border-amber-200/60 p-6 rounded-2xl flex flex-col justify-between min-h-[180px] cursor-pointer hover:bg-amber-100/50 transition relative">
                     <div>
-                        <p class="text-xs font-semibold text-amber-700 uppercase mb-2">선택한 날짜의 양도 가능</p>
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="text-xs font-semibold text-amber-700 uppercase">선택한 날짜의 양도 가능</p>
+                            <span class="text-[10px] bg-amber-200/60 text-amber-900 font-bold px-2 py-0.5 rounded-full"><i class="fa-solid fa-utensils mr-1"></i>오늘의 급식 보기</span>
+                        </div>
                         <div class="flex items-baseline space-x-1">
                             <span class="text-4xl font-extrabold text-amber-900" id="availCount">0</span>
                             <span class="text-sm font-medium text-amber-700">장</span>
                         </div>
                     </div>
-                    <p class="text-xs text-amber-600/80">실시간 등록 상태 기준</p>
+                    <p class="text-xs text-amber-600/80">실시간 등록 상태 기준 (클릭 시 오늘의 식단 확인)</p>
                 </div>
 
-                <!-- Banner 3 -->
                 <div class="bg-purple-50 border border-purple-200/60 p-6 rounded-2xl flex flex-col justify-between min-h-[180px]">
                     <div>
                         <p class="text-xs font-semibold text-purple-700 uppercase mb-2">판매 금액 설정</p>
@@ -80,9 +75,7 @@
                 </div>
             </div>
 
-            <!-- Marketplace & Transfer Rules -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Left: Marketplace -->
                 <div class="lg:col-span-2 space-y-4">
                     <div class="flex items-center justify-between">
                         <div>
@@ -95,15 +88,11 @@
                         </button>
                     </div>
 
-                    <!-- Date Filter Tabs -->
                     <div class="flex space-x-2 border-b border-slate-200 pb-2">
-                        <button class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white">전체</button>
-                        <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">오늘 (09.01)</button>
-                        <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">내일 (09.02)</button>
-                        <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">목요일 (09.03)</button>
+                        <button onclick="filterPosts('all')" id="filterAll" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white">전체</button>
+                        <button onclick="filterPosts('today')" id="filterToday" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">오늘</button>
                     </div>
 
-                    <!-- Post List Container -->
                     <div id="postList" class="space-y-3">
                         <div class="bg-white p-12 rounded-2xl border border-slate-200/80 text-center text-slate-400 flex flex-col items-center justify-center min-h-[220px]">
                             <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3 text-slate-400">
@@ -115,7 +104,6 @@
                     </div>
                 </div>
 
-                <!-- Right: Transfer Rules Info -->
                 <div class="space-y-6">
                     <div class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-4">
                         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -147,7 +135,6 @@
                         </button>
                     </div>
 
-                    <!-- Caution Notice -->
                     <div class="bg-amber-50/60 border border-amber-200/60 p-5 rounded-2xl space-y-2">
                         <div class="flex items-center space-x-2 text-amber-900">
                             <i class="fa-solid fa-circle-exclamation text-xs"></i>
@@ -159,7 +146,6 @@
                         <button onclick="switchNav('guide')" class="text-[11px] font-semibold text-amber-900 underline block pt-1">안내 자세히 보기 →</button>
                     </div>
 
-                    <!-- How it works summary -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-4">
                         <div class="flex items-center justify-between">
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">HOW IT WORKS</span>
@@ -187,7 +173,6 @@
             </div>
         </div>
 
-        <!-- GUIDE VIEW -->
         <div id="viewGuide" class="hidden space-y-6 max-w-4xl mx-auto">
             <div>
                 <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">HOW IT WORKS</p>
@@ -226,7 +211,6 @@
             </div>
         </div>
 
-        <!-- MY TRADES VIEW -->
         <div id="viewMyTrades" class="hidden space-y-6 max-w-4xl mx-auto">
             <div>
                 <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">MY ACTIVITY</p>
@@ -246,7 +230,6 @@
         </div>
     </main>
 
-    <!-- Register Modal -->
     <div id="registerModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -258,7 +241,7 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">아이디</label>
                     <div class="flex space-x-2">
-                        <input type="text" id="regUsername" required class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-indigo-500" placeholder="아이디 입력">
+                        <input type="text" id="regUsername" oninput="isUsernameChecked=false" required class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-indigo-500" placeholder="아이디 입력">
                         <button type="button" onclick="checkDuplicate('username')" class="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 whitespace-nowrap transition">중복확인</button>
                     </div>
                     <p id="regUsernameMsg" class="text-[11px] mt-1"></p>
@@ -267,7 +250,7 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">닉네임</label>
                     <div class="flex space-x-2">
-                        <input type="text" id="regNickname" required class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-indigo-500" placeholder="닉네임 입력">
+                        <input type="text" id="regNickname" oninput="isNicknameChecked=false" required class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-indigo-500" placeholder="닉네임 입력">
                         <button type="button" onclick="checkDuplicate('nickname')" class="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 whitespace-nowrap transition">중복확인</button>
                     </div>
                     <p id="regNicknameMsg" class="text-[11px] mt-1"></p>
@@ -300,7 +283,6 @@
         </div>
     </div>
 
-    <!-- Login Modal -->
     <div id="loginModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -316,7 +298,6 @@
         </div>
     </div>
 
-    <!-- Post Modal -->
     <div id="postModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -345,11 +326,39 @@
         </div>
     </div>
 
-    <!-- JS Logic -->
+    <div id="mealModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                    <i class="fa-solid fa-utensils text-amber-500"></i>
+                    <span>서라벌고등학교 오늘의 급식</span>
+                </h3>
+                <button onclick="closeMealModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-4 text-xs">
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-200/60">
+                    <span class="font-bold text-amber-800 text-sm block mb-1">☀️ 점심 (중식)</span>
+                    <p id="mealLunchText" class="text-slate-700 leading-relaxed">식단을 불러오는 중입니다...</p>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-xl border border-purple-200/60">
+                    <span class="font-bold text-purple-800 text-sm block mb-1">🌙 저녁 (석식)</span>
+                    <p id="mealDinnerText" class="text-slate-700 leading-relaxed">식단을 불러오는 중입니다...</p>
+                </div>
+            </div>
+            <button onclick="closeMealModal()" class="w-full bg-slate-900 text-white font-bold py-2.5 rounded-xl text-xs">닫기</button>
+        </div>
+    </div>
+
     <script>
         let currentUser = JSON.parse(localStorage.getItem('user')) || null;
         let isUsernameChecked = false;
         let isNicknameChecked = false;
+        let allPostsData = [];
+
+        window.onload = function() {
+            updateNav();
+            fetchPosts();
+        };
 
         function updateNav() {
             const nav = document.getElementById('navAuthArea');
@@ -389,6 +398,23 @@
             document.getElementById('postModal').classList.remove('hidden');
         }
         function closePostModal() { document.getElementById('postModal').classList.add('hidden'); }
+
+        // 급식 모달 처리
+        async function openMealModal() {
+            document.getElementById('mealModal').classList.remove('hidden');
+            try {
+                const res = await fetch('/api/meal');
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('mealLunchText').innerText = data.lunch || '오늘 점심 정보가 없습니다.';
+                    document.getElementById('mealDinnerText').innerText = data.dinner || '오늘 저녁 정보가 없습니다.';
+                }
+            } catch (err) {
+                document.getElementById('mealLunchText').innerText = '급식 정보를 불러오지 못했습니다.';
+                document.getElementById('mealDinnerText').innerText = '급식 정보를 불러오지 못했습니다.';
+            }
+        }
+        function closeMealModal() { document.getElementById('mealModal').classList.add('hidden'); }
 
         async function checkDuplicate(field) {
             const inputVal = field === 'username' ? document.getElementById('regUsername').value : document.getElementById('regNickname').value;
@@ -497,41 +523,62 @@
         async function fetchPosts() {
             try {
                 const res = await fetch('/api/posts');
-                const posts = await res.json();
-                const postList = document.getElementById('postList');
-                document.getElementById('availCount').innerText = posts.length || 0;
-
-                if (!posts || posts.length === 0) {
-                    postList.innerHTML = `
-                        <div class="bg-white p-12 rounded-2xl border border-slate-200/80 text-center text-slate-400 flex flex-col items-center justify-center min-h-[220px]">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3 text-slate-400">
-                                <i class="fa-regular fa-folder-open text-xl"></i>
-                            </div>
-                            <p class="text-sm font-medium text-slate-600">아직 올려둔 신청권이 없어요</p>
-                            <p class="text-xs text-slate-400 mt-1">다른 날짜를 확인하거나, 첫 석식 신청을 올려보세요.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                postList.innerHTML = posts.map(p => `
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 hover:border-indigo-200 transition flex items-center justify-between">
-                        <div>
-                            <div class="flex items-center space-x-2 mb-1">
-                                <span class="bg-indigo-50 text-indigo-600 font-bold text-[10px] px-2 py-0.5 rounded">${p.meal_date || '석식'}</span>
-                                <h4 class="text-sm font-bold text-slate-800">${p.title}</h4>
-                            </div>
-                            <p class="text-xs text-slate-500">${p.content || ''}</p>
-                            <p class="text-[11px] text-slate-400 mt-2">판매자: ${p.seller?.nickname || '학생'}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-base font-extrabold text-slate-900">${p.price.toLocaleString()}원</p>
-                            <button onclick="alert('채팅 기능으로 연결됩니다.')" class="mt-2 bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">구매하기</button>
-                        </div>
-                    </div>
-                `).join('');
+                allPostsData = await res.json();
+                renderPosts(allPostsData);
             } catch (err) {
                 console.error(err);
+            }
+        }
+
+        function renderPosts(posts) {
+            const postList = document.getElementById('postList');
+            document.getElementById('availCount').innerText = posts.length || 0;
+
+            if (!posts || posts.length === 0) {
+                postList.innerHTML = `
+                    <div class="bg-white p-12 rounded-2xl border border-slate-200/80 text-center text-slate-400 flex flex-col items-center justify-center min-h-[220px]">
+                        <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3 text-slate-400">
+                            <i class="fa-regular fa-folder-open text-xl"></i>
+                        </div>
+                        <p class="text-sm font-medium text-slate-600">아직 올려둔 신청권이 없어요</p>
+                        <p class="text-xs text-slate-400 mt-1">다른 날짜를 확인하거나, 첫 석식 신청을 올려보세요.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            postList.innerHTML = posts.map(p => `
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 hover:border-indigo-200 transition flex items-center justify-between shadow-sm">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="bg-indigo-50 text-indigo-600 font-bold text-[10px] px-2 py-0.5 rounded">${p.meal_date || '석식'}</span>
+                            <h4 class="text-sm font-bold text-slate-800">${p.title}</h4>
+                        </div>
+                        <p class="text-xs text-slate-500">${p.content || ''}</p>
+                        <p class="text-[11px] text-slate-400 mt-2">판매자: ${p.seller?.nickname || '학생'}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-base font-extrabold text-slate-900">${Number(p.price).toLocaleString()}원</p>
+                        <button onclick="alert('채팅 기능으로 연결됩니다.')" class="mt-2 bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">구매하기</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterPosts(type) {
+            const filterAll = document.getElementById('filterAll');
+            const filterToday = document.getElementById('filterToday');
+
+            if(type === 'today') {
+                const now = new Date().toISOString().split('T')[0];
+                const filtered = allPostsData.filter(p => p.meal_date === now);
+                filterToday.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white";
+                filterAll.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100";
+                renderPosts(filtered);
+            } else {
+                filterAll.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white";
+                filterToday.className = "px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100";
+                renderPosts(allPostsData);
             }
         }
 
@@ -543,7 +590,7 @@
                 seller_id: currentUser.id,
                 title: document.getElementById('postTitle').value,
                 meal_date: document.getElementById('postMealDate').value,
-                price: Number(document.getElementById('postPrice').value),
+                price: parseInt(document.getElementById('postPrice').value),
                 content: document.getElementById('postContent').value
             };
 
@@ -553,17 +600,18 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
                 });
-                if (res.ok) {
+                const data = await res.json();
+                if (data.success) {
+                    alert('석식 양도 게시물이 등록되었습니다.');
                     closePostModal();
                     fetchPosts();
+                } else {
+                    alert('등록 실패');
                 }
             } catch (err) {
-                alert('게시글 등록 실패');
+                alert('서버 등록 실패');
             }
         }
-
-        updateNav();
-        fetchPosts();
     </script>
 </body>
 </html>
