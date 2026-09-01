@@ -3,186 +3,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>밥포탈 - 서라벌고등학교 석식 신청권 양도 플랫폼</title>
+    <title>밥포탈 - 서라벌고등학교 석식 신청권 양도</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
-        .active-tab { border-bottom: 2px solid #6366f1; color: #6366f1; font-weight: 600; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
+    <!-- Header -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-6">
                 <div class="flex items-center space-x-2 cursor-pointer" onclick="switchNav('home')">
                     <span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">밥포탈</span>
                 </div>
-                <div class="hidden md:flex space-x-4 text-sm font-medium text-slate-500">
-                    <span class="text-slate-400">서라벌고등학교</span>
-                    <span>|</span>
-                    <span class="text-slate-700">석식 신청권 양도</span>
+                <div class="hidden md:flex items-center space-x-2 text-xs font-medium text-slate-500">
+                    <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded">서라벌고등학교</span>
+                    <span>석식 신청권 양도</span>
                 </div>
             </div>
+
             <div class="flex items-center space-x-4" id="navAuthArea">
-                </div>
+                <!-- JS 동적 렌더링 -->
+            </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div id="viewHome">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-amber-400 text-amber-950 p-6 rounded-2xl shadow-sm relative overflow-hidden">
-                    <p class="text-xs font-semibold uppercase tracking-wider mb-1 opacity-80">DINNER TRANSFER</p>
-                    <h2 class="text-2xl font-bold mb-4">못 먹는 석식,<br>필요한 친구에게 양도해요.</h2>
-                    <p class="text-xs opacity-75">사전에 신청한 석식을 못 먹는 날,<br>카페 후 전달받은 학번으로 급식실에서 먹을 수 있어요.</p>
-                </div>
-                <div class="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl flex flex-col justify-between">
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+        
+        <!-- HOME VIEW -->
+        <div id="viewHome" class="space-y-8">
+            <!-- Top Banner Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Banner 1 -->
+                <div class="bg-amber-400 text-amber-950 p-6 rounded-2xl shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px]">
                     <div>
-                        <p class="text-xs font-semibold text-indigo-500 uppercase mb-1">선택된 날짜의 양도 가능</p>
-                        <p class="text-3xl font-extrabold text-indigo-900 mb-1">0<span class="text-lg font-normal text-slate-600">장</span></p>
-                        <p class="text-xs text-slate-500">실시간 등록 상태 기준</p>
+                        <p class="text-[11px] font-bold uppercase tracking-wider mb-2 opacity-80">DINNER TRANSFER</p>
+                        <h2 class="text-2xl font-black leading-tight mb-2">못 먹는 석식,<br>필요한 친구에게 양도해요.</h2>
                     </div>
+                    <p class="text-xs opacity-80 leading-relaxed">
+                        사전에 신청한 석식을 못 먹는 날,<br>
+                        카페 후 전달받은 학번으로 급식실에서 먹을 수 있어요.
+                    </p>
                 </div>
-                <div class="bg-purple-50 border border-purple-100 p-6 rounded-2xl flex flex-col justify-between">
+
+                <!-- Banner 2 -->
+                <div class="bg-amber-50 border border-amber-200/60 p-6 rounded-2xl flex flex-col justify-between min-h-[180px]">
                     <div>
-                        <p class="text-xs font-semibold text-purple-500 uppercase mb-1">판매 금액 설정</p>
-                        <p class="text-3xl font-extrabold text-purple-900 mb-1">6,000<span class="text-lg font-normal text-slate-600">원</span></p>
-                        <p class="text-xs text-slate-500">양도 등록 시 설정할 수 있어요</p>
+                        <p class="text-xs font-semibold text-amber-700 uppercase mb-2">선택한 날짜의 양도 가능</p>
+                        <div class="flex items-baseline space-x-1">
+                            <span class="text-4xl font-extrabold text-amber-900" id="availCount">0</span>
+                            <span class="text-sm font-medium text-amber-700">장</span>
+                        </div>
                     </div>
-                    <button onclick="openPostModal()" class="w-full mt-4 bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 rounded-xl text-sm transition">
-                        + 석식 양도
+                    <p class="text-xs text-amber-600/80">실시간 등록 상태 기준</p>
+                </div>
+
+                <!-- Banner 3 -->
+                <div class="bg-purple-50 border border-purple-200/60 p-6 rounded-2xl flex flex-col justify-between min-h-[180px]">
+                    <div>
+                        <p class="text-xs font-semibold text-purple-700 uppercase mb-2">판매 금액 설정</p>
+                        <div class="flex items-baseline space-x-1">
+                            <span class="text-4xl font-extrabold text-purple-900">6,000</span>
+                            <span class="text-sm font-medium text-purple-700">원</span>
+                        </div>
+                        <p class="text-xs text-purple-600/80 mt-1">양도 등록 시 설정할 수 있어요</p>
+                    </div>
+                    <button onclick="openPostModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 rounded-xl text-sm transition mt-3 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>석식 양도</span>
                     </button>
                 </div>
             </div>
 
+            <!-- Marketplace & Transfer Rules -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold">지금 올라온 석식 신청권</h3>
+                <!-- Left: Marketplace -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">MARKETPLACE</p>
+                            <h3 class="text-lg font-bold text-slate-800">지금 올라온 석식 신청권</h3>
+                        </div>
+                        <button onclick="switchNav('guide')" class="text-xs text-slate-400 hover:text-slate-600 flex items-center space-x-1">
+                            <span>필터</span>
+                            <i class="fa-solid fa-sliders text-[10px]"></i>
+                        </button>
                     </div>
-                    <div id="postList" class="space-y-4">
-                        <div class="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-400">
-                            <i class="fa-regular fa-folder-open text-3xl mb-2"></i>
-                            <p>아직 올려둔 신청권이 없어요</p>
+
+                    <!-- Date Filter Tabs -->
+                    <div class="flex space-x-2 border-b border-slate-200 pb-2">
+                        <button class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white">전체</button>
+                        <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">오늘 (09.01)</button>
+                        <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">내일 (09.02)</button>
+                        <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">목요일 (09.03)</button>
+                    </div>
+
+                    <!-- Post List Container -->
+                    <div id="postList" class="space-y-3">
+                        <div class="bg-white p-12 rounded-2xl border border-slate-200/80 text-center text-slate-400 flex flex-col items-center justify-center min-h-[220px]">
+                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3 text-slate-400">
+                                <i class="fa-regular fa-folder-open text-xl"></i>
+                            </div>
+                            <p class="text-sm font-medium text-slate-600">아직 올려둔 신청권이 없어요</p>
+                            <p class="text-xs text-slate-400 mt-1">다른 날짜를 확인하거나, 첫 석식 신청을 올려보세요.</p>
                         </div>
                     </div>
                 </div>
 
+                <!-- Right: Transfer Rules Info -->
                 <div class="space-y-6">
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200">
-                        <h4 class="font-bold text-sm mb-3">양도 절차</h4>
-                        <ol class="space-y-3 text-xs text-slate-600">
-                            <li class="flex items-start space-x-2">
-                                <span class="bg-slate-100 font-bold px-2 py-0.5 rounded text-slate-800">1</span>
-                                <span>석식 양도 등록 (양도할 날짜 및 가격 설정)</span>
-                            </li>
-                            <li class="flex items-start space-x-2">
-                                <span class="bg-slate-100 font-bold px-2 py-0.5 rounded text-slate-800">2</span>
-                                <span>거래 요청 및 확정 (1:1 채팅으로 개인 학번 전달)</span>
-                            </li>
-                        </ol>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">TRANSFER RULES</span>
+                            <span class="text-[11px] bg-emerald-50 text-emerald-600 font-semibold px-2 py-0.5 rounded">안내</span>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-slate-800">석식 양도</h4>
+                                    <p class="text-[11px] text-slate-500 mt-0.5">카페 후 학번을 개인적으로 전달</p>
+                                </div>
+                                <span class="ml-auto text-xs font-semibold text-indigo-600">최대 6,000원</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 space-y-2 text-xs">
+                            <div class="flex justify-between text-slate-600">
+                                <span>게시물에 적지 않는 정보</span>
+                                <span class="font-bold text-slate-800">학번 (비공개)</span>
+                            </div>
+                        </div>
+
+                        <button onclick="switchNav('guide')" class="w-full text-center text-xs font-semibold text-slate-600 hover:text-slate-900 py-2 border border-slate-200 rounded-xl hover:bg-slate-50 transition flex items-center justify-center space-x-1">
+                            <span>양도 방법 보기</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <!-- Caution Notice -->
+                    <div class="bg-amber-50/60 border border-amber-200/60 p-5 rounded-2xl space-y-2">
+                        <div class="flex items-center space-x-2 text-amber-900">
+                            <i class="fa-solid fa-circle-exclamation text-xs"></i>
+                            <h4 class="text-xs font-bold">학생은 이렇게 진행해요</h4>
+                        </div>
+                        <p class="text-[11px] text-amber-800/80 leading-relaxed">
+                            석식권을 파는 학생은 등록을 하고, 거래가 성공해 결제완료가 되면 구매자에게 개인적으로 학번을 전송해요.
+                        </p>
+                        <button onclick="switchNav('guide')" class="text-[11px] font-semibold text-amber-900 underline block pt-1">안내 자세히 보기 →</button>
+                    </div>
+
+                    <!-- How it works summary -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">HOW IT WORKS</span>
+                            <button onclick="switchNav('guide')" class="text-xs font-semibold text-indigo-600">자세히 보기</button>
+                        </div>
+                        <h4 class="text-sm font-bold text-slate-800">양도 절차</h4>
+                        <div class="space-y-3 text-xs">
+                            <div class="flex items-start space-x-3">
+                                <span class="w-5 h-5 rounded-full bg-slate-100 font-bold text-slate-600 flex items-center justify-center text-[10px] shrink-0">1</span>
+                                <div>
+                                    <p class="font-semibold text-slate-800">석식 양도 등록</p>
+                                    <p class="text-[11px] text-slate-500">날짜와 판매 가격을 설정하여 등록해요</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <span class="w-5 h-5 rounded-full bg-slate-100 font-bold text-slate-600 flex items-center justify-center text-[10px] shrink-0">2</span>
+                                <div>
+                                    <p class="font-semibold text-slate-800">거래 요청 및 확정</p>
+                                    <p class="text-[11px] text-slate-500">1:1 채팅이나 안내에 따라 학번을 전달해요</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="viewGuide" class="hidden">
-            <h2 class="text-2xl font-bold mb-6">이용안내</h2>
-            <div class="bg-white p-8 rounded-2xl border border-slate-200 space-y-6">
-                <div>
-                    <h3 class="font-bold text-lg mb-2">1. 신청 내역 올리기</h3>
-                    <p class="text-sm text-slate-600">못 먹게 된 석식을 등록하여 판매할 수 있습니다.</p>
+        <!-- GUIDE VIEW -->
+        <div id="viewGuide" class="hidden space-y-6 max-w-4xl mx-auto">
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">HOW IT WORKS</p>
+                <h2 class="text-2xl font-black text-slate-800 mt-1">이용안내</h2>
+                <p class="text-xs text-slate-500 mt-1">밥포탈은 서라벌고등학교 학생끼리 석식 신청권을 안전하게 전달하는 공간이에요.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-2">
+                    <span class="text-xs font-bold text-slate-300">01</span>
+                    <h3 class="text-sm font-bold text-slate-800">신청 내역 올리기</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">못 먹게 된 석식 날짜와 판매 가격을 정해 석식 신청권을 등록해요.</p>
                 </div>
-                <div>
-                    <h3 class="font-bold text-lg mb-2">2. 원하는 신청 찾기</h3>
-                    <p class="text-sm text-slate-600">필요한 날짜의 석식을 찾아 구매를 요청할 수 있습니다.</p>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-2">
+                    <span class="text-xs font-bold text-slate-300">02</span>
+                    <h3 class="text-sm font-bold text-slate-800">원하는 신청 찾기</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">날짜별로 올려둔 석식 양도 신청 중 원하는 신청권을 찾아요.</p>
                 </div>
-                <div>
-                    <h3 class="font-bold text-lg mb-2">3. 학번을 개인적으로 받기</h3>
-                    <p class="text-sm text-slate-600">구매 확정 후 1:1 채팅을 통해 안전하게 학번을 전달받습니다.</p>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 space-y-2">
+                    <span class="text-xs font-bold text-slate-300">03</span>
+                    <h3 class="text-sm font-bold text-slate-800">학번을 개인적으로 받기</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">구매가 수락되면 거래가 생성되고, 구매자는 판매자의 학번을 전달받아서 이용해요.</p>
                 </div>
+            </div>
+
+            <div class="bg-amber-50/80 border border-amber-200 p-6 rounded-2xl space-y-3">
+                <div class="flex items-center space-x-2 text-amber-900 font-bold text-sm">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>꼭 지켜주세요</span>
+                </div>
+                <ul class="space-y-2 text-xs text-amber-800 list-disc list-inside leading-relaxed">
+                    <li>판매 금액은 원가 8,000원 이하 / 최대 6,000원까지만 등록할 수 있어요.</li>
+                    <li>학번 정보는 오픈된 공간에 적지 말고 게시글 작성 시 개인정보 입력란에만 정확히 적으세요.</li>
+                    <li>적발된 가짜 양도 건 및 악성 게시글은 예고 없이 삭제되며 이용 제한될 수 있습니다.</li>
+                </ul>
             </div>
         </div>
 
-        <div id="viewMyTrades" class="hidden">
-            <h2 class="text-2xl font-bold mb-6">내 거래</h2>
-            <div class="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-400">
-                <p>아직 내 거래가 없어요.</p>
+        <!-- MY TRADES VIEW -->
+        <div id="viewMyTrades" class="hidden space-y-6 max-w-4xl mx-auto">
+            <div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">MY ACTIVITY</p>
+                <h2 class="text-2xl font-black text-slate-800 mt-1">내 거래</h2>
+                <p class="text-xs text-slate-500 mt-1">올린 석식 신청권과 받은 신청권을 한눈에 확인하세요.</p>
+            </div>
+
+            <div class="flex space-x-2 border-b border-slate-200 pb-2">
+                <button class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-900 text-white">전체 물품 0</button>
+                <button class="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">올린 신청 0</button>
+                <button class="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100">받은 신청 0</button>
+            </div>
+
+            <div class="bg-white p-16 rounded-2xl border border-slate-200/80 text-center text-slate-400">
+                <p class="text-sm font-medium text-slate-500">아직 내 거래가 없어요.</p>
             </div>
         </div>
     </main>
 
-    <div id="registerModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center">
-                <h3 class="text-lg font-bold">회원가입</h3>
-                <button onclick="closeRegisterModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <!-- Register Modal -->
+    <div id="registerModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-800">회원가입</h3>
+                <button onclick="closeRegisterModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             
-            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3">
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3.5">
                 <div>
-                    <label class="block text-xs font-semibold mb-1">아이디</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">아이디</label>
                     <div class="flex space-x-2">
-                        <input type="text" id="regUsername" required class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-indigo-500" placeholder="아이디 입력">
-                        <button type="button" onclick="checkDuplicate('username')" class="bg-slate-800 text-white text-xs px-3 py-2 rounded-lg hover:bg-slate-700 whitespace-nowrap">중복확인</button>
+                        <input type="text" id="regUsername" required class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-indigo-500" placeholder="아이디 입력">
+                        <button type="button" onclick="checkDuplicate('username')" class="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 whitespace-nowrap transition">중복확인</button>
                     </div>
-                    <p id="regUsernameMsg" class="text-xs mt-1"></p>
+                    <p id="regUsernameMsg" class="text-[11px] mt-1"></p>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold mb-1">닉네임</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">닉네임</label>
                     <div class="flex space-x-2">
-                        <input type="text" id="regNickname" required class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-indigo-500" placeholder="닉네임 입력">
-                        <button type="button" onclick="checkDuplicate('nickname')" class="bg-slate-800 text-white text-xs px-3 py-2 rounded-lg hover:bg-slate-700 whitespace-nowrap">중복확인</button>
+                        <input type="text" id="regNickname" required class="flex-1 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-indigo-500" placeholder="닉네임 입력">
+                        <button type="button" onclick="checkDuplicate('nickname')" class="bg-slate-900 text-white text-xs font-medium px-3 py-2 rounded-xl hover:bg-slate-800 whitespace-nowrap transition">중복확인</button>
                     </div>
-                    <p id="regNicknameMsg" class="text-xs mt-1"></p>
+                    <p id="regNicknameMsg" class="text-[11px] mt-1"></p>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold mb-1">비밀번호</label>
-                    <input type="password" id="regPassword" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-indigo-500" placeholder="비밀번호">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">비밀번호</label>
+                    <input type="password" id="regPassword" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-indigo-500" placeholder="비밀번호 입력">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold mb-1">이름</label>
-                    <input type="text" id="regName" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-indigo-500" placeholder="이름 입력">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">이름</label>
+                    <input type="text" id="regName" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-indigo-500" placeholder="이름 입력">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold mb-1">전화번호</label>
-                    <input type="tel" id="regPhone" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-indigo-500" placeholder="010-0000-0000">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">전화번호</label>
+                    <input type="tel" id="regPhone" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-indigo-500" placeholder="010-0000-0000">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold mb-1">학번</label>
-                    <input type="text" id="regStudentId" required class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-indigo-500" placeholder="예: 30101">
+                    <label class="block text-xs font-bold text-slate-700 mb-1">학번</label>
+                    <input type="text" id="regStudentId" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-indigo-500" placeholder="예: 30101">
                 </div>
 
-                <p id="registerGlobalMsg" class="text-xs text-red-500 text-center"></p>
+                <p id="registerGlobalMsg" class="text-xs text-red-500 text-center font-medium"></p>
 
-                <button type="submit" class="w-full bg-indigo-600 text-white font-medium py-2.5 rounded-xl text-sm hover:bg-indigo-700 transition">가입하기</button>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl text-xs hover:bg-indigo-700 transition shadow-sm">가입하기</button>
             </form>
         </div>
     </div>
 
-    <div id="loginModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4">
-            <div class="flex justify-between items-center">
-                <h3 class="text-lg font-bold">로그인</h3>
-                <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-800">로그인</h3>
+                <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-3">
-                <input type="text" id="loginUsername" required placeholder="아이디" class="w-full border rounded-lg px-3 py-2 text-sm">
-                <input type="password" id="loginPassword" required placeholder="비밀번호" class="w-full border rounded-lg px-3 py-2 text-sm">
-                <p id="loginMsg" class="text-xs text-red-500"></p>
-                <button type="submit" class="w-full bg-indigo-600 text-white py-2.5 rounded-xl text-sm font-medium">로그인</button>
+                <input type="text" id="loginUsername" required placeholder="아이디" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-xs focus:outline-indigo-500">
+                <input type="password" id="loginPassword" required placeholder="비밀번호" class="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-xs focus:outline-indigo-500">
+                <p id="loginMsg" class="text-xs text-red-500 font-medium"></p>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-xl text-xs font-bold hover:bg-indigo-700 transition">로그인</button>
             </form>
         </div>
     </div>
 
+    <!-- Post Modal -->
+    <div id="postModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="text-base font-bold text-slate-800">석식 양도 등록</h3>
+                <button onclick="closePostModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleCreatePost(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">제목</label>
+                    <input type="text" id="postTitle" required placeholder="예: 9/1 석식 양도합니다" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">날짜</label>
+                    <input type="date" id="postMealDate" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">판매 가격 (최대 6,000원)</label>
+                    <input type="number" id="postPrice" max="6000" required placeholder="6000" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">상세 내용</label>
+                    <textarea id="postContent" rows="3" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-xs" placeholder="추가 전달사항을 적어주세요"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-slate-900 text-white font-bold py-3 rounded-xl text-xs hover:bg-slate-800 transition">등록하기</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JS Logic -->
     <script>
         let currentUser = JSON.parse(localStorage.getItem('user')) || null;
         let isUsernameChecked = false;
@@ -192,16 +355,16 @@
             const nav = document.getElementById('navAuthArea');
             if (currentUser) {
                 nav.innerHTML = `
-                    <span class="text-xs font-semibold text-slate-700">${currentUser.nickname}님</span>
-                    <button onclick="switchNav('guide')" class="text-xs text-slate-600 hover:text-slate-900">이용안내</button>
-                    <button onclick="switchNav('myTrades')" class="text-xs text-slate-600 hover:text-slate-900">내 거래</button>
-                    <button onclick="handleLogout()" class="text-xs text-red-500 font-medium">로그아웃</button>
+                    <span class="text-xs font-bold text-slate-700">${currentUser.nickname}님</span>
+                    <button onclick="switchNav('guide')" class="text-xs font-medium text-slate-600 hover:text-slate-900">이용안내</button>
+                    <button onclick="switchNav('myTrades')" class="text-xs font-medium text-slate-600 hover:text-slate-900">내 거래</button>
+                    <button onclick="handleLogout()" class="text-xs text-red-500 font-bold ml-2">로그아웃</button>
                 `;
             } else {
                 nav.innerHTML = `
-                    <button onclick="switchNav('guide')" class="text-xs text-slate-600 hover:text-slate-900">이용안내</button>
-                    <button onclick="openLoginModal()" class="text-xs text-slate-600 hover:text-slate-900">로그인</button>
-                    <button onclick="openRegisterModal()" class="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700">회원가입</button>
+                    <button onclick="switchNav('guide')" class="text-xs font-medium text-slate-600 hover:text-slate-900">이용안내</button>
+                    <button onclick="openLoginModal()" class="text-xs font-medium text-slate-600 hover:text-slate-900">로그인</button>
+                    <button onclick="openRegisterModal()" class="text-xs bg-indigo-600 text-white font-bold px-3 py-2 rounded-xl hover:bg-indigo-700 transition">회원가입</button>
                 `;
             }
         }
@@ -214,20 +377,25 @@
             if (view === 'home') document.getElementById('viewHome').classList.remove('hidden');
             if (view === 'guide') document.getElementById('viewGuide').classList.remove('hidden');
             if (view === 'myTrades') document.getElementById('viewMyTrades').classList.remove('hidden');
+            window.scrollTo(0,0);
         }
 
         function openRegisterModal() { document.getElementById('registerModal').classList.remove('hidden'); }
         function closeRegisterModal() { document.getElementById('registerModal').classList.add('hidden'); }
         function openLoginModal() { document.getElementById('loginModal').classList.remove('hidden'); }
         function closeLoginModal() { document.getElementById('loginModal').classList.add('hidden'); }
+        function openPostModal() {
+            if (!currentUser) { alert('로그인이 필요합니다.'); openLoginModal(); return; }
+            document.getElementById('postModal').classList.remove('hidden');
+        }
+        function closePostModal() { document.getElementById('postModal').classList.add('hidden'); }
 
-        // 아이디 및 닉네임 중복확인
         async function checkDuplicate(field) {
             const inputVal = field === 'username' ? document.getElementById('regUsername').value : document.getElementById('regNickname').value;
             const msgElem = field === 'username' ? document.getElementById('regUsernameMsg') : document.getElementById('regNicknameMsg');
 
             if (!inputVal.trim()) {
-                msgElem.className = 'text-xs text-red-500 mt-1';
+                msgElem.className = 'text-[11px] text-red-500 mt-1';
                 msgElem.innerText = '값을 입력해 주세요.';
                 return;
             }
@@ -241,35 +409,28 @@
                 const data = await res.json();
 
                 if (data.available) {
-                    msgElem.className = 'text-xs text-green-600 mt-1';
+                    msgElem.className = 'text-[11px] text-emerald-600 font-semibold mt-1';
                     msgElem.innerText = data.message;
                     if (field === 'username') isUsernameChecked = true;
                     if (field === 'nickname') isNicknameChecked = true;
                 } else {
-                    msgElem.className = 'text-xs text-red-500 mt-1';
+                    msgElem.className = 'text-[11px] text-red-500 font-semibold mt-1';
                     msgElem.innerText = data.message;
                     if (field === 'username') isUsernameChecked = false;
                     if (field === 'nickname') isNicknameChecked = false;
                 }
             } catch (err) {
-                msgElem.className = 'text-xs text-red-500 mt-1';
-                msgElem.innerText = '중복확인 중 오류가 발생했습니다.';
+                msgElem.className = 'text-[11px] text-red-500 mt-1';
+                msgElem.innerText = '중복확인 오류';
             }
         }
 
-        // 회원가입 처리
         async function handleRegister(e) {
             e.preventDefault();
             const msgElem = document.getElementById('registerGlobalMsg');
 
-            if (!isUsernameChecked) {
-                msgElem.innerText = '아이디 중복확인을 해주세요.';
-                return;
-            }
-            if (!isNicknameChecked) {
-                msgElem.innerText = '닉네임 중복확인을 해주세요.';
-                return;
-            }
+            if (!isUsernameChecked) { msgElem.innerText = '아이디 중복확인을 해주세요.'; return; }
+            if (!isNicknameChecked) { msgElem.innerText = '닉네임 중복확인을 해주세요.'; return; }
 
             const body = {
                 username: document.getElementById('regUsername').value.trim(),
@@ -294,14 +455,13 @@
                     closeRegisterModal();
                     openLoginModal();
                 } else {
-                    msgElem.innerText = data.error || '회원가입에 실패했습니다.';
+                    msgElem.innerText = data.error || '회원가입 실패';
                 }
             } catch (err) {
-                msgElem.innerText = '서버 연결 실패';
+                msgElem.innerText = '서버 통신 실패';
             }
         }
 
-        // 로그인 처리
         async function handleLogin(e) {
             e.preventDefault();
             const username = document.getElementById('loginUsername').value.trim();
@@ -324,7 +484,7 @@
                     document.getElementById('loginMsg').innerText = data.error || '로그인 실패';
                 }
             } catch (err) {
-                document.getElementById('loginMsg').innerText = '서버 오류';
+                document.getElementById('loginMsg').innerText = '서버 접속 실패';
             }
         }
 
@@ -334,7 +494,76 @@
             updateNav();
         }
 
+        async function fetchPosts() {
+            try {
+                const res = await fetch('/api/posts');
+                const posts = await res.json();
+                const postList = document.getElementById('postList');
+                document.getElementById('availCount').innerText = posts.length || 0;
+
+                if (!posts || posts.length === 0) {
+                    postList.innerHTML = `
+                        <div class="bg-white p-12 rounded-2xl border border-slate-200/80 text-center text-slate-400 flex flex-col items-center justify-center min-h-[220px]">
+                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mb-3 text-slate-400">
+                                <i class="fa-regular fa-folder-open text-xl"></i>
+                            </div>
+                            <p class="text-sm font-medium text-slate-600">아직 올려둔 신청권이 없어요</p>
+                            <p class="text-xs text-slate-400 mt-1">다른 날짜를 확인하거나, 첫 석식 신청을 올려보세요.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                postList.innerHTML = posts.map(p => `
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 hover:border-indigo-200 transition flex items-center justify-between">
+                        <div>
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="bg-indigo-50 text-indigo-600 font-bold text-[10px] px-2 py-0.5 rounded">${p.meal_date || '석식'}</span>
+                                <h4 class="text-sm font-bold text-slate-800">${p.title}</h4>
+                            </div>
+                            <p class="text-xs text-slate-500">${p.content || ''}</p>
+                            <p class="text-[11px] text-slate-400 mt-2">판매자: ${p.seller?.nickname || '학생'}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-base font-extrabold text-slate-900">${p.price.toLocaleString()}원</p>
+                            <button onclick="alert('채팅 기능으로 연결됩니다.')" class="mt-2 bg-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition">구매하기</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function handleCreatePost(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const body = {
+                seller_id: currentUser.id,
+                title: document.getElementById('postTitle').value,
+                meal_date: document.getElementById('postMealDate').value,
+                price: Number(document.getElementById('postPrice').value),
+                content: document.getElementById('postContent').value
+            };
+
+            try {
+                const res = await fetch('/api/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (res.ok) {
+                    closePostModal();
+                    fetchPosts();
+                }
+            } catch (err) {
+                alert('게시글 등록 실패');
+            }
+        }
+
         updateNav();
+        fetchPosts();
     </script>
 </body>
 </html>
