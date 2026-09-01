@@ -1,15 +1,24 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const bcrypt = require('bcryptjs');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
 
-// Supabase 환경 변수 체크 및 예외 처리
+// 1. public 폴더 안의 파일들을 static으로 제공
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 2. 루트 접속 시 public/index.html을 직접 열어줌 (Cannot GET / 방지 핵심)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Supabase 클라이언트 설정
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
 
@@ -108,7 +117,7 @@ app.post('/api/posts', async (req, res) => {
     res.json(data);
 });
 
-// ================= 1:1 채팅 & 1시간 제한 삭제 =================
+// ================= 1:1 채팅 & 1시간 뒤 자동 삭제 =================
 
 async function cleanupExpiredChats() {
     if (!supabase) return;
@@ -217,7 +226,6 @@ app.post('/api/chat/:chatId/complete', async (req, res) => {
     res.json({ success: true, completed_at: now });
 });
 
-// Vercel Serverless 모듈 내보내기
 module.exports = app;
 
 if (process.env.NODE_ENV !== 'production') {
