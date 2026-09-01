@@ -1,394 +1,438 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>밥포탈 - 학생 석식 티켓 교환 플랫폼</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <style>
-    body { background-color: #0f172a; color: #f8fafc; font-family: 'Pretendard', sans-serif; }
-    .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-    .btn-primary { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
-    .btn-primary:hover { opacity: 0.9; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>밥포탈 (BobPotal) - 석식 양도 시스템</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#f0fdf4', 500: '#22c55e', 600: '#16a34a', 900: '#14532d' },
+                        dark: { bg: '#0b0f17', card: '#161e2e', border: '#2d3748' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-dark-bg text-slate-100 min-h-screen flex flex-col font-sans">
 
-  <!-- Navigation Bar -->
-  <nav class="glass-card sticky top-0 z-50 px-6 py-4 flex justify-between items-center border-b border-slate-800">
-    <div class="flex items-center space-x-3 cursor-pointer" onclick="location.reload()">
-      <div class="bg-indigo-600 p-2 rounded-xl text-white">
-        <i class="fa-solid fa-utensils text-xl"></i>
-      </div>
-      <span class="text-2xl font-extrabold tracking-tight text-white">밥포탈</span>
-    </div>
-    <div id="auth-buttons" class="space-x-3">
-      <button onclick="openModal('login-modal')" class="px-4 py-2 text-sm text-slate-300 hover:text-white transition">로그인</button>
-      <button onclick="openModal('register-modal')" class="px-4 py-2 text-sm font-semibold btn-primary text-white rounded-lg shadow-md transition">회원가입</button>
-    </div>
-    <div id="user-profile" class="hidden items-center space-x-4">
-      <span id="user-display-name" class="text-sm font-medium text-slate-300"></span>
-      <button onclick="openModal('post-modal')" class="px-4 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition">티켓 양도하기</button>
-      <button onclick="logout()" class="px-3 py-2 text-xs text-slate-400 hover:text-red-400">로그아웃</button>
-    </div>
-  </nav>
-
-  <!-- Hero & Post List -->
-  <main class="flex-1 max-w-5xl w-full mx-auto p-6 space-y-8">
-    <header class="text-center py-8 space-y-3">
-      <h1 class="text-4xl font-extrabold text-white">오늘의 석식 티켓을 안전하게 교환하세요</h1>
-      <p class="text-slate-400">학생 간 1:1 직거래 / 거래 완료 시 학생 정보 자동 공개 시스템</p>
+    <!-- Header -->
+    <header class="border-b border-dark-border bg-dark-card/50 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showView('posts')">
+                <i class="fa-solid fa-utensils text-brand-500 text-2xl"></i>
+                <span class="text-xl font-bold tracking-tight text-white">밥포탈 <span class="text-xs text-brand-500 font-normal border border-brand-500/30 px-2 py-0.5 rounded-full">서라벌고</span></span>
+            </div>
+            <div id="auth-buttons" class="flex items-center space-x-3">
+                <button onclick="openModal('login')" class="px-4 py-2 text-sm text-slate-300 hover:text-white transition">로그인</button>
+                <button onclick="openModal('register')" class="px-4 py-2 text-sm bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-lg transition">회원가입</button>
+            </div>
+            <div id="user-profile" class="hidden flex items-center space-x-4">
+                <span id="user-info-text" class="text-sm text-slate-300"></span>
+                <button onclick="logout()" class="text-xs text-slate-400 hover:text-rose-400">로그아웃</button>
+            </div>
+        </div>
     </header>
 
-    <!-- Post Filter / List -->
-    <div class="space-y-4">
-      <h2 class="text-xl font-bold text-slate-200 flex items-center">
-        <i class="fa-solid fa-[#6366f1] fa-ticket mr-2 text-indigo-500"></i> 실시간 올라온 티켓
-      </h2>
-      <div id="post-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- JS로 게시글 동적 로드 -->
-      </div>
-    </div>
-  </main>
-
-  <!-- 회원가입 모달 -->
-  <div id="register-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card max-w-md w-full p-6 rounded-2xl space-y-4 border border-slate-700">
-      <div class="flex justify-between items-center">
-        <h3 class="text-xl font-bold text-white">밥포탈 회원가입</h3>
-        <button onclick="closeModal('register-modal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <form id="register-form" onsubmit="handleRegister(event)" class="space-y-3">
-        <div class="flex space-x-2">
-          <input type="text" id="reg-username" placeholder="아이디" required class="flex-1 bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-          <button type="button" onclick="checkUsername()" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-xs rounded-lg text-white">중복확인</button>
-        </div>
-        <div class="flex space-x-2">
-          <input type="text" id="reg-nickname" placeholder="닉네임" required class="flex-1 bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-indigo-500">
-          <button type="button" onclick="checkNickname()" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-xs rounded-lg text-white">중복확인</button>
-        </div>
-        <input type="password" id="reg-password" placeholder="비밀번호" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none">
-        <input type="text" id="reg-name" placeholder="이름 (예: 홍길동)" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none">
-        <input type="text" id="reg-phone" placeholder="전화번호" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none">
-        <div class="grid grid-cols-2 gap-2">
-          <input type="text" id="reg-school" placeholder="학교명" required class="bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none">
-          <input type="text" id="reg-studentid" placeholder="학번" required class="bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none">
-        </div>
-        <div class="space-y-1">
-          <label class="text-xs text-slate-400">석식 이용 요일 선택</label>
-          <div class="flex gap-2 text-xs text-white">
-            <label><input type="checkbox" value="월" class="reg-day"> 월</label>
-            <label><input type="checkbox" value="화" class="reg-day"> 화</label>
-            <label><input type="checkbox" value="수" class="reg-day"> 수</label>
-            <label><input type="checkbox" value="목" class="reg-day"> 목</label>
-            <label><input type="checkbox" value="금" class="reg-day"> 금</label>
-          </div>
-        </div>
-        <div class="flex items-center space-x-2 pt-2">
-          <input type="checkbox" id="reg-terms" required class="rounded bg-slate-800">
-          <label for="reg-terms" class="text-xs text-slate-400">개인정보 수집 및 거래 이용약관 동의</label>
-        </div>
-        <button type="submit" class="w-full py-3 btn-primary text-white font-bold rounded-lg transition">가입 완료</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 로그인 모달 -->
-  <div id="login-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card max-w-sm w-full p-6 rounded-2xl space-y-4">
-      <div class="flex justify-between items-center">
-        <h3 class="text-xl font-bold text-white">로그인</h3>
-        <button onclick="closeModal('login-modal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <form onsubmit="handleLogin(event)" class="space-y-3">
-        <input type="text" id="login-username" placeholder="아이디" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none">
-        <input type="password" id="login-password" placeholder="비밀번호" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none">
-        <button type="submit" class="w-full py-3 btn-primary text-white font-bold rounded-lg transition">로그인</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 게시글 등록 모달 -->
-  <div id="post-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card max-w-sm w-full p-6 rounded-2xl space-y-4">
-      <div class="flex justify-between items-center">
-        <h3 class="text-xl font-bold text-white">석식 티켓 양도글 올리기</h3>
-        <button onclick="closeModal('post-modal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <form onsubmit="handleCreatePost(event)" class="space-y-3">
-        <select id="post-day" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white">
-          <option value="">양도할 요일 선택</option>
-          <option value="월">월요일 석식</option>
-          <option value="화">화요일 석식</option>
-          <option value="수">수요일 석식</option>
-          <option value="목">목요일 석식</option>
-          <option value="금">금요일 석식</option>
-        </select>
-        <textarea id="post-desc" placeholder="상세 설명 (예: 5교시 끝나고 매점 앞 거래)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none h-24"></textarea>
-        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition">등록하기</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- 1:1 거래 채팅 모달 -->
-  <div id="chat-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-    <div class="glass-card max-w-lg w-full h-[500px] p-4 rounded-2xl flex flex-col justify-between">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <h3 class="text-lg font-bold text-white flex items-center"><i class="fa-solid fa-comments text-indigo-400 mr-2"></i> 1:1 거래 채팅방</h3>
-        <button onclick="closeChatModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div id="chat-box" class="flex-1 overflow-y-auto py-3 space-y-2 px-1">
-        <!-- 메시지 로드 -->
-      </div>
-      <div id="seller-info-box" class="hidden p-3 bg-emerald-950/80 border border-emerald-500/30 rounded-xl text-xs text-emerald-200 mb-2">
-        <!-- 거래 완료 시 판매자 정보 표시 -->
-      </div>
-      <div class="flex space-x-2 border-t border-slate-700 pt-3">
-        <input type="text" id="chat-input" placeholder="메시지를 입력하세요..." class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none">
-        <button onclick="sendMessage()" class="px-4 py-2 btn-primary text-white text-sm rounded-lg">전송</button>
-        <button id="complete-btn" onclick="completeTrade()" class="px-3 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs rounded-lg">거래완료</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let currentUser = null;
-    let isUsernameChecked = false;
-    let isNicknameChecked = false;
-    let activeRoomId = null;
-    let chatInterval = null;
-
-    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-    async function checkUsername() {
-      const username = document.getElementById('reg-username').value;
-      if (!username) return alert('아이디를 입력해주세요.');
-      const res = await fetch('/api/check-username', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ username })
-      });
-      const data = await res.json();
-      alert(data.message);
-      if (data.available) isUsernameChecked = true;
-    }
-
-    async function checkNickname() {
-      const nickname = document.getElementById('reg-nickname').value;
-      if (!nickname) return alert('닉네임을 입력해주세요.');
-      const res = await fetch('/api/check-nickname', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ nickname })
-      });
-      const data = await res.json();
-      alert(data.message);
-      if (data.available) isNicknameChecked = true;
-    }
-
-    async function handleRegister(e) {
-      e.preventDefault();
-      if (!isUsernameChecked) return alert('아이디 중복 확인을 진행해주세요.');
-      if (!isNicknameChecked) return alert('닉네임 중복 확인을 진행해주세요.');
-
-      const dinner_days = Array.from(document.querySelectorAll('.reg-day:checked')).map(cb => cb.value);
-
-      const payload = {
-        username: document.getElementById('reg-username').value,
-        nickname: document.getElementById('reg-nickname').value,
-        password: document.getElementById('reg-password').value,
-        name: document.getElementById('reg-name').value,
-        phone: document.getElementById('reg-phone').value,
-        school: document.getElementById('reg-school').value,
-        student_id: document.getElementById('reg-studentid').value,
-        dinner_days,
-        terms_agreed: document.getElementById('reg-terms').checked
-      };
-
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        alert('회원가입 완료! 로그인해주세요.');
-        closeModal('register-modal');
-        openModal('login-modal');
-      } else {
-        alert(data.message);
-      }
-    }
-
-    async function handleLogin(e) {
-      e.preventDefault();
-      const username = document.getElementById('login-username').value;
-      const password = document.getElementById('login-password').value;
-
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ username, password })
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        currentUser = data.user;
-        document.getElementById('auth-buttons').classList.add('hidden');
-        document.getElementById('user-profile').classList.remove('hidden');
-        document.getElementById('user-display-name').innerText = `${currentUser.nickname} (${currentUser.school})`;
-        closeModal('login-modal');
-        loadPosts();
-      } else {
-        alert(data.message);
-      }
-    }
-
-    function logout() {
-      currentUser = null;
-      document.getElementById('auth-buttons').classList.remove('hidden');
-      document.getElementById('user-profile').classList.add('hidden');
-    }
-
-    async function loadPosts() {
-      const res = await fetch('/api/posts');
-      const data = await res.json();
-      const listEl = document.getElementById('post-list');
-      listEl.innerHTML = '';
-
-      if (data.posts) {
-        data.posts.forEach(post => {
-          const card = document.createElement('div');
-          card.className = "glass-card p-5 rounded-2xl space-y-3 border border-slate-800 hover:border-indigo-500/50 transition";
-          card.innerHTML = `
-            <div class="flex justify-between items-start">
-              <span class="px-2.5 py-1 text-xs font-bold bg-indigo-500/20 text-indigo-400 rounded-md border border-indigo-500/30">${post.day_of_week}요일 티켓</span>
-              <span class="text-xs text-slate-400">${post.users?.school || ''}</span>
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6">
+        
+        <!-- 게시글 목록 뷰 -->
+        <section id="view-posts" class="space-y-6">
+            <div class="flex justify-between items-center bg-dark-card p-6 rounded-2xl border border-dark-border">
+                <div>
+                    <h1 class="text-2xl font-bold text-white mb-1">석식 양도 게시판</h1>
+                    <p class="text-slate-400 text-sm">안전하게 1대1로 석식 신청권을 양도하고 거래하세요.</p>
+                </div>
+                <button onclick="checkPostPermission()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl flex items-center space-x-2 transition shadow-lg shadow-brand-600/20">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>양도 글쓰기</span>
+                </button>
             </div>
-            <p class="text-sm text-slate-300 font-medium">${post.description || '내용 없음'}</p>
-            <div class="flex justify-between items-center pt-2 border-t border-slate-800">
-              <span class="text-xs text-slate-500">작성자: ${post.users?.nickname || '익명'}</span>
-              <button onclick="startChat(${post.id}, ${post.seller_id})" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition">거래하기</button>
+
+            <div id="posts-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Posts will be loaded here -->
             </div>
-          `;
-          listEl.appendChild(card);
-        });
-      }
-    }
+        </section>
 
-    async function handleCreatePost(e) {
-      e.preventDefault();
-      if (!currentUser) return alert('로그인이 필요합니다.');
+        <!-- 1:1 채팅 뷰 -->
+        <section id="view-chat" class="hidden space-y-4 max-w-3xl mx-auto">
+            <button onclick="showView('posts')" class="text-slate-400 hover:text-white flex items-center space-x-2 text-sm mb-2">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>목록으로 돌아가기</span>
+            </button>
 
-      const day_of_week = document.getElementById('post-day').value;
-      const description = document.getElementById('post-desc').value;
-
-      const res = await fetch('/api/posts', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ seller_id: currentUser.id, day_of_week, description })
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        alert('양도글이 생성되었습니다.');
-        closeModal('post-modal');
-        loadPosts();
-      }
-    }
-
-    async function startChat(postId, sellerId) {
-      if (!currentUser) return alert('로그인 후 이용 가능합니다.');
-      if (currentUser.id === sellerId) return alert('본인이 작성한 글입니다.');
-
-      const res = await fetch('/api/chat/start', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ post_id: postId, seller_id: sellerId, buyer_id: currentUser.id })
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        activeRoomId = data.room.id;
-        openModal('chat-modal');
-        fetchMessages();
-        chatInterval = setInterval(fetchMessages, 2000); // 2초 주기 폴링
-      }
-    }
-
-    function closeChatModal() {
-      closeModal('chat-modal');
-      clearInterval(chatInterval);
-      activeRoomId = null;
-    }
-
-    async function fetchMessages() {
-      if (!activeRoomId) return;
-      const res = await fetch(`/api/chat/messages/${activeRoomId}`);
-      const data = await res.json();
-      if (data.success) {
-        const chatBox = document.getElementById('chat-box');
-        chatBox.innerHTML = '';
-        data.messages.forEach(msg => {
-          const isMine = msg.sender_nickname === currentUser.nickname;
-          const msgEl = document.createElement('div');
-          msgEl.className = `flex flex-col ${isMine ? 'items-end' : 'items-start'}`;
-          msgEl.innerHTML = `
-            <span class="text-[10px] text-slate-500 mb-0.5">${msg.sender_nickname}</span>
-            <div class="px-3 py-2 rounded-xl text-xs max-w-[80%] ${isMine ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-200'}">
-              ${msg.message}
+            <!-- 구매자 전용: 판매자 학번 알림 카운트다운/강조 카드 -->
+            <div id="student-id-notice" class="hidden bg-emerald-950/60 border border-emerald-500/50 p-4 rounded-xl flex items-start space-x-3 text-emerald-200">
+                <i class="fa-solid fa-circle-info text-emerald-400 text-xl mt-0.5"></i>
+                <div class="flex-1">
+                    <div class="font-bold text-white text-base flex items-center justify-between">
+                        <span>🎉 거래 완료! 판매자 학번 안내</span>
+                        <span id="chat-timer" class="text-xs bg-emerald-900/80 px-2.5 py-1 rounded-full text-emerald-300 font-mono">1시간 후 삭제</span>
+                    </div>
+                    <p class="text-sm mt-1">판매자의 학번: <strong id="seller-student-id-display" class="text-emerald-300 text-lg underline ml-1 font-mono"></strong></p>
+                    <p class="text-xs text-emerald-400/80 mt-0.5">※ 잊어버리지 않게 메모해 두세요. 이 채팅방은 거래 완료 1시간 뒤에 자동으로 지워집니다.</p>
+                </div>
             </div>
-          `;
-          chatBox.appendChild(msgEl);
-        });
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
-    }
 
-    async function sendMessage() {
-      const input = document.getElementById('chat-input');
-      if (!input.value.trim() || !activeRoomId) return;
+            <div class="bg-dark-card border border-dark-border rounded-2xl flex flex-col h-[600px] overflow-hidden">
+                <!-- Chat Header -->
+                <div class="p-4 border-b border-dark-border bg-slate-900/50 flex justify-between items-center">
+                    <div>
+                        <h2 id="chat-title" class="font-bold text-white">채팅방</h2>
+                        <p id="chat-status-sub" class="text-xs text-slate-400">1:1 실시간 대화 중</p>
+                    </div>
+                    <button id="btn-complete-trade" onclick="completeTrade()" class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg transition">
+                        거래 확정하기
+                    </button>
+                </div>
 
-      await fetch('/api/chat/message', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          room_id: activeRoomId,
-          sender_nickname: currentUser.nickname,
-          message: input.value
-        })
-      });
-      input.value = '';
-      fetchMessages();
-    }
+                <!-- Messages Body -->
+                <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3">
+                    <!-- Messages loaded dynamically -->
+                </div>
 
-    async function completeTrade() {
-      if (!confirm('거래를 확정하시겠습니까? 거래 완료 시 상대방에게 나의 정보가 제공될 수 있습니다.')) return;
+                <!-- Message Input -->
+                <div class="p-3 border-t border-dark-border bg-slate-900/30 flex space-x-2">
+                    <input type="text" id="chat-input" onkeypress="if(event.key==='Enter') sendMessage()" placeholder="메시지를 입력하세요..." class="flex-1 bg-slate-800 border border-dark-border rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-brand-500">
+                    <button onclick="sendMessage()" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-sm font-medium transition">전송</button>
+                </div>
+            </div>
+        </section>
+    </main>
 
-      const res = await fetch('/api/chat/complete', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ room_id: activeRoomId })
-      });
+    <!-- 모달: 로그인 -->
+    <div id="modal-login" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 w-full max-w-md space-y-4">
+            <h2 class="text-xl font-bold text-white">로그인</h2>
+            <input type="text" id="login-username" placeholder="아이디" class="w-full bg-slate-800 border border-dark-border rounded-xl px-4 py-2.5 text-sm text-white">
+            <input type="password" id="login-password" placeholder="비밀번호" class="w-full bg-slate-800 border border-dark-border rounded-xl px-4 py-2.5 text-sm text-white">
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('login')" class="px-4 py-2 text-slate-400 text-sm">취소</button>
+                <button onclick="submitLogin()" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-xl text-sm">로그인</button>
+            </div>
+        </div>
+    </div>
 
-      const data = await res.json();
-      if (data.success) {
-        const infoBox = document.getElementById('seller-info-box');
-        infoBox.classList.remove('hidden');
-        infoBox.innerHTML = `
-          <strong>🎉 거래가 확정되었습니다!</strong><br/>
-          판매자 이름: ${data.seller_info.name}<br/>
-          학번: ${data.seller_info.student_id}<br/>
-          연락처: ${data.seller_info.phone}
-        `;
-      }
-    }
+    <!-- 모달: 회원가입 -->
+    <div id="modal-register" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 w-full max-w-md space-y-3 my-8">
+            <h2 class="text-xl font-bold text-white mb-2">회원가입</h2>
+            
+            <div class="flex space-x-2">
+                <input type="text" id="reg-username" placeholder="아이디" class="flex-1 bg-slate-800 border border-dark-border rounded-xl px-4 py-2 text-sm text-white">
+                <button onclick="checkDup('username')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded-xl">중복확인</button>
+            </div>
 
-    // 초기 게시글 조회
-    loadPosts();
-  </script>
+            <div class="flex space-x-2">
+                <input type="text" id="reg-nickname" placeholder="닉네임" class="flex-1 bg-slate-800 border border-dark-border rounded-xl px-4 py-2 text-sm text-white">
+                <button onclick="checkDup('nickname')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded-xl">중복확인</button>
+            </div>
+
+            <input type="password" id="reg-password" placeholder="비밀번호" class="w-full bg-slate-800 border border-dark-border rounded-xl px-4 py-2 text-sm text-white">
+            <input type="text" id="reg-name" placeholder="이름 (예: 홍길동)" class="w-full bg-slate-800 border border-dark-border rounded-xl px-4 py-2 text-sm text-white">
+            <input type="text" id="reg-phone" placeholder="전화번호" class="w-full bg-slate-800 border border-dark-border rounded-xl px-4 py-2 text-sm text-white">
+            <input type="text" id="reg-school" value="서라벌고등학교" readonly class="w-full bg-slate-900 border border-dark-border rounded-xl px-4 py-2 text-sm text-slate-400 cursor-not-allowed">
+            <input type="text" id="reg-student-id" placeholder="학번 (예: 10424)" class="w-full bg-slate-800 border border-dark-border rounded-xl px-4 py-2 text-sm text-white">
+
+            <div class="flex justify-end space-x-2 pt-3">
+                <button onclick="closeModal('register')" class="px-4 py-2 text-slate-400 text-sm">취소</button>
+                <button onclick="submitRegister()" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-xl text-sm">가입 완료</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달: 글쓰기 -->
+    <div id="modal-post" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-dark-card border border-dark-border rounded-2xl p-6 w-full max-w-md space-y-3">
+            <h2 class="text-xl font-bold text-white">석식 양도 글쓰기</h2>
+            <input type="text" id="post-title" placeholder="제목 (예: 오늘 석식 팝니다)" class="w-full bg-slate-800 border border-dark-border rounded-xl px-4 py-2 text-sm text-white">
+            <input type="number" id="post-price" placeholder="가격 (원)" class="w-full bg-slate-800 border border-dark-border rounded-xl px-4 py-2 text-sm text-white">
+            <input type="date" id="post-date" class="w-full bg-slate-800 border border-dark-border rounded-xl px-4 py-2 text-sm text-white">
+            <textarea id="post-content" placeholder="상세 설명을 적어주세요..." class="w-full bg-slate-800 border border-dark-border rounded-xl px-4 py-2 text-sm text-white h-24"></textarea>
+            
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeModal('post')" class="px-4 py-2 text-slate-400 text-sm">취소</button>
+                <button onclick="submitPost()" class="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white font-medium rounded-xl text-sm">작성완료</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = JSON.parse(localStorage.getItem('user')) || null;
+        let currentChatId = null;
+        let chatPollingInterval = null;
+        let dupCheckStatus = { username: false, nickname: false };
+
+        window.onload = function() {
+            updateAuthUI();
+            loadPosts();
+        };
+
+        function showView(viewName) {
+            document.getElementById('view-posts').classList.add('hidden');
+            document.getElementById('view-chat').classList.add('hidden');
+            if (chatPollingInterval) clearInterval(chatPollingInterval);
+
+            if (viewName === 'posts') {
+                document.getElementById('view-posts').classList.remove('hidden');
+                loadPosts();
+            } else if (viewName === 'chat') {
+                document.getElementById('view-chat').classList.remove('hidden');
+            }
+        }
+
+        function openModal(id) { document.getElementById(`modal-${id}`).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(`modal-${id}`).classList.add('hidden'); }
+
+        function updateAuthUI() {
+            if (currentUser) {
+                document.getElementById('auth-buttons').classList.add('hidden');
+                document.getElementById('user-profile').classList.remove('hidden');
+                document.getElementById('user-info-text').innerText = `${currentUser.nickname} (${currentUser.school || '서라벌고'})`;
+            } else {
+                document.getElementById('auth-buttons').classList.remove('hidden');
+                document.getElementById('user-profile').classList.add('hidden');
+            }
+        }
+
+        async function checkDup(field) {
+            const val = document.getElementById(`reg-${field}`).value.trim();
+            if(!val) return alert('값을 입력하세요.');
+
+            const res = await fetch('/api/check-duplicate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ field, value: val })
+            });
+            const data = await res.json();
+            alert(data.message);
+            if(data.available) dupCheckStatus[field] = true;
+        }
+
+        async function submitRegister() {
+            if(!dupCheckStatus.username || !dupCheckStatus.nickname) {
+                return alert('아이디와 닉네임 중복확인을 진행해 주세요.');
+            }
+            const payload = {
+                username: document.getElementById('reg-username').value,
+                nickname: document.getElementById('reg-nickname').value,
+                password: document.getElementById('reg-password').value,
+                name: document.getElementById('reg-name').value,
+                phone: document.getElementById('reg-phone').value,
+                school: document.getElementById('reg-school').value,
+                student_id: document.getElementById('reg-student-id').value
+            };
+
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.success) {
+                alert('회원가입이 완료되었습니다!');
+                closeModal('register');
+                openModal('login');
+            } else {
+                alert(data.error);
+            }
+        }
+
+        async function submitLogin() {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: document.getElementById('login-username').value,
+                    password: document.getElementById('login-password').value
+                })
+            });
+            const data = await res.json();
+            if(data.success) {
+                currentUser = data.user;
+                localStorage.setItem('user', JSON.stringify(currentUser));
+                updateAuthUI();
+                closeModal('login');
+            } else {
+                alert(data.error);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            currentUser = null;
+            updateAuthUI();
+            showView('posts');
+        }
+
+        async function loadPosts() {
+            const res = await fetch('/api/posts');
+            const posts = await res.json();
+            const container = document.getElementById('posts-list');
+            container.innerHTML = '';
+
+            posts.forEach(post => {
+                const card = document.createElement('div');
+                card.className = "bg-dark-card border border-dark-border rounded-2xl p-5 hover:border-brand-500/50 transition cursor-pointer flex flex-col justify-between";
+                card.onclick = () => startChat(post.id, post.seller_id);
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs px-2.5 py-1 rounded-full ${post.status === 'AVAILABLE' ? 'bg-brand-500/10 text-brand-500 border border-brand-500/20' : 'bg-slate-800 text-slate-400'} font-medium">
+                                ${post.status === 'AVAILABLE' ? '양도가능' : '거래완료'}
+                            </span>
+                            <span class="text-sm font-bold text-brand-500">${Number(post.price).toLocaleString()}원</span>
+                        </div>
+                        <h3 class="font-bold text-white text-lg mb-1">${post.title}</h3>
+                        <p class="text-slate-400 text-xs mb-3 line-clamp-2">${post.content}</p>
+                    </div>
+                    <div class="border-t border-dark-border/50 pt-3 flex justify-between items-center text-xs text-slate-400">
+                        <span>판매자: ${post.seller ? post.seller.nickname : '익명'}</span>
+                        <span>날짜: ${post.meal_date || '당일'}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function checkPostPermission() {
+            if(!currentUser) return alert('로그인 후 이용 가능합니다.');
+            openModal('post');
+        }
+
+        async function submitPost() {
+            const res = await fetch('/api/posts', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    seller_id: currentUser.id,
+                    title: document.getElementById('post-title').value,
+                    price: document.getElementById('post-price').value,
+                    meal_date: document.getElementById('post-date').value,
+                    content: document.getElementById('post-content').value
+                })
+            });
+            if(res.ok) {
+                closeModal('post');
+                loadPosts();
+            }
+        }
+
+        // ================= 1:1 채팅 & 구매자 전용 알림 =================
+
+        async function startChat(postId, sellerId) {
+            if(!currentUser) return alert('로그인 후 1대1 대화를 시작할 수 있습니다.');
+            if(currentUser.id === sellerId) return alert('본인이 올린 게시글입니다.');
+
+            const res = await fetch('/api/chat/start', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ post_id: postId, buyer_id: currentUser.id })
+            });
+            const chat = await res.json();
+            openChatRoom(chat.id);
+        }
+
+        function openChatRoom(chatId) {
+            currentChatId = chatId;
+            showView('chat');
+            fetchChatDetails();
+            if(chatPollingInterval) clearInterval(chatPollingInterval);
+            chatPollingInterval = setInterval(fetchChatDetails, 2500); // 2.5초 간격 실시간 갱신
+        }
+
+        async function fetchChatDetails() {
+            if(!currentChatId) return;
+            const res = await fetch(`/api/chat/${currentChatId}`);
+            if(!res.ok) {
+                const err = await res.json();
+                alert(err.error || '채팅방이 만료되었습니다.');
+                showView('posts');
+                return;
+            }
+            const { chat, messages } = await res.json();
+
+            // UI 텍스트 설정
+            document.getElementById('chat-title').innerText = `${chat.post ? chat.post.title : '채팅방'}`;
+            
+            // 거래 완료 버튼 (판매자만 볼 수 있음)
+            const isSeller = currentUser && currentUser.id === chat.seller_id;
+            const btnComplete = document.getElementById('btn-complete-trade');
+            if(isSeller && chat.status === 'ACTIVE') {
+                btnComplete.classList.remove('hidden');
+            } else {
+                btnComplete.classList.add('hidden');
+            }
+
+            // 구매자 전용 알림 카드 노출 로직 (거래 완료 시)
+            const noticeBox = document.getElementById('student-id-notice');
+            if(chat.status === 'COMPLETED') {
+                document.getElementById('chat-status-sub').innerText = '거래 완료 (1시간 후 대화방 자동 삭제)';
+                
+                // 구매자인 경우에만 판매자의 학번 알림 카드를 노출
+                if(currentUser && currentUser.id === chat.buyer_id) {
+                    noticeBox.classList.remove('hidden');
+                    document.getElementById('seller-student-id-display').innerText = `${chat.seller.student_id} (${chat.seller.name || chat.seller.nickname})`;
+                    
+                    // 남은 시간 계산
+                    if(chat.completed_at) {
+                        const remainingMs = (new Date(chat.completed_at).getTime() + 60*60*1000) - Date.now();
+                        const remainingMin = Math.max(0, Math.floor(remainingMs / (1000 * 60)));
+                        document.getElementById('chat-timer').innerText = `남은시간: 약 ${remainingMin}분`;
+                    }
+                } else {
+                    noticeBox.classList.add('hidden');
+                }
+            } else {
+                noticeBox.classList.add('hidden');
+            }
+
+            // 메시지 랜더링
+            const msgBox = document.getElementById('chat-messages');
+            msgBox.innerHTML = '';
+            messages.forEach(m => {
+                const isMe = currentUser && m.sender_id === currentUser.id;
+                const div = document.createElement('div');
+                div.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+                div.innerHTML = `
+                    <div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${isMe ? 'bg-brand-600 text-white rounded-br-none' : 'bg-slate-800 text-slate-200 border border-dark-border rounded-bl-none'}">
+                        ${m.content}
+                    </div>
+                `;
+                msgBox.appendChild(div);
+            });
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const content = input.value.trim();
+            if(!content || !currentChatId) return;
+
+            await fetch(`/api/chat/${currentChatId}/message`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ sender_id: currentUser.id, content })
+            });
+            input.value = '';
+            fetchChatDetails();
+        }
+
+        async function completeTrade() {
+            if(!confirm('거래를 확정하시겠습니까? 구매자에게 판매자님의 학물이 전달되며, 대화방은 1시간 후 삭제됩니다.')) return;
+
+            const res = await fetch(`/api/chat/${currentChatId}/complete`, { method: 'POST' });
+            if(res.ok) {
+                alert('거래가 완료되었습니다.');
+                fetchChatDetails();
+            }
+        }
+    </script>
 </body>
 </html>
