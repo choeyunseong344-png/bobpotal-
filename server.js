@@ -7,9 +7,9 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-// Supabase 설정 (본인의 정보를 세팅하세요)
-const SUPABASE_URL = process.env.SUPABASE_URL || 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'YOUR_SUPABASE_KEY';
+// Supabase 설정 (Vercel 환경 변수 우선 적용, 없을 경우 안전하게 처리)
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'placeholder';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 1. 서라벌고등학교 실시간 급식 메뉴 API (나이스 개방포털)
@@ -59,7 +59,7 @@ app.post('/api/check-duplicate', async (req, res) => {
 
         if (error) throw error;
 
-        if (data.length > 0) {
+        if (data && data.length > 0) {
             return res.json({ available: false, message: `이미 사용 중인 ${field === 'username' ? '아이디' : '닉네임'}입니다.` });
         }
         res.json({ available: true, message: `사용 가능한 ${field === 'username' ? '아이디' : '닉네임'}입니다.` });
@@ -131,5 +131,16 @@ app.post('/api/posts', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// SPA 라우팅 지원 (HTML 페이지 반환)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// 로컬 테스트 환경에서만 app.listen 실행
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+// Vercel 서버리스 핸들러용 Export (필수)
+module.exports = app;
