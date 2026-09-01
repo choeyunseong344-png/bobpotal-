@@ -1,0 +1,15 @@
+{
+  "name": "bapjari-server",
+  "version": "1.0.0",
+  "description": "서라벌고 석식 양도 거래 시스템 (Vercel + Supabase)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  }
+}
