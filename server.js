@@ -1,134 +1,135 @@
 const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const bcrypt = require('bcryptjs');
+const axios = require('axios');
 const { createClient } = require('@supabase/supabase-js');
-require('dotenv').config();
+const path = require('path');
 
 const app = express();
-
-app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 
-app.use(express.static(path.join(__dirname, 'public')));
+// Supabase 설정 (본인의 정보를 세팅하세요)
+const SUPABASE_URL = process.env.SUPABASE_URL || 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'YOUR_SUPABASE_KEY';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// 1. 서라벌고등학교 실시간 급식 메뉴 API (나이스 개방포털)
+app.get('/api/meal', async (req, res) => {
+    try {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const ymd = `${year}${month}${day}`;
+
+        // 서울시교육청(B10), 서라벌고등학교(7010185)
+        const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=B10&SD_SCHUL_CODE=7010185&MLSV_YMD=${ymd}`;
+        const response = await axios.get(url);
+        const data = response.data;
+
+        let lunch = '';
+        let dinner = '';
+
+        if (data.mealServiceDietInfo && data.mealServiceDietInfo[1]) {
+            const rows = data.mealServiceDietInfo[1].row;
+            rows.forEach(row => {
+                const cleanMenu = row.DDISH_NM.replace(/<br\/>/g, ', ').replace(/\([0-9\.]+\)/g, '').trim();
+                if (row.MMEAL_SC_CODE === '2') lunch = cleanMenu;
+                if (row.MMEAL_SC_CODE === '3') dinner = cleanMenu;
+            });
+        }
+
+        res.json({
+            success: true,
+            lunch: lunch || '오늘 점심 정보가 없습니다.',
+            dinner: dinner || '오늘 저녁 정보가 없습니다.'
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: '급식 정보 조회 오류' });
+    }
 });
 
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
-
-let supabase = null;
-if (supabaseUrl && supabaseKey) {
-    supabase = createClient(supabaseUrl, supabaseKey);
-}
-
+// 2. 아이디/닉네임 중복확인 API
 app.post('/api/check-duplicate', async (req, res) => {
-    if (!supabase) return res.status(500).json({ available: false, message: 'Supabase 미설정' });
     const { field, value } = req.body;
-    
-    if (!['username', 'nickname'].includes(field)) {
-        return res.status(400).json({ available: false, message: '유효하지 않은 항목입니다.' });
-    }
-
     try {
         const { data, error } = await supabase
             .from('users')
             .select('id')
             .eq(field, value);
 
-        if (error) {
-            return res.status(400).json({ available: false, message: '중복 확인 실패' });
-        }
+        if (error) throw error;
 
-        if (data && data.length > 0) {
+        if (data.length > 0) {
             return res.json({ available: false, message: `이미 사용 중인 ${field === 'username' ? '아이디' : '닉네임'}입니다.` });
         }
-
-        return res.json({ available: true, message: `사용 가능한 ${field === 'username' ? '아이디' : '닉네임'}입니다.` });
+        res.json({ available: true, message: `사용 가능한 ${field === 'username' ? '아이디' : '닉네임'}입니다.` });
     } catch (err) {
-        return res.status(500).json({ available: false, message: '서버 에러' });
+        res.status(500).json({ available: false, message: 'DB 확인 오류' });
     }
 });
 
+// 3. 회원가입 API
 app.post('/api/register', async (req, res) => {
-    if (!supabase) return res.status(500).json({ error: 'Supabase 미설정' });
-    const { username, nickname, password, name, phone, school, student_id } = req.body;
-
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const { data, error } = await supabase.from('users').insert([{
-            username,
-            nickname,
-            password: hashedPassword,
-            name,
-            phone,
-            school: school || '서라벌고등학교',
-            student_id
-        }]).select().single();
+        const { username, nickname, password, name, phone, school, student_id } = req.body;
+        const { data, error } = await supabase
+            .from('users')
+            .insert([{ username, nickname, password, name, phone, school, student_id }]);
 
-        if (error) {
-            if (error.code === '23505') {
-                return res.status(400).json({ error: '이미 존재하는 아이디 또는 닉네임입니다.' });
-            }
-            return res.status(400).json({ error: error.message });
-        }
-
-        res.json({ success: true, user: { id: data.id, username: data.username, nickname: data.nickname } });
+        if (error) throw error;
+        res.json({ success: true });
     } catch (err) {
-        res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+        res.status(400).json({ success: false, error: err.message });
     }
 });
 
+// 4. 로그인 API
 app.post('/api/login', async (req, res) => {
-    if (!supabase) return res.status(500).json({ error: 'Supabase 미설정' });
-    const { username, password } = req.body;
-    
-    const { data: user, error } = await supabase.from('users').select('*').eq('username', username).single();
-    if (error || !user) return res.status(400).json({ error: '아이디 또는 비밀번호가 올바르지 않습니다.' });
+    try {
+        const { username, password } = req.body;
+        const { data, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('username', username)
+            .eq('password', password)
+            .single();
 
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) return res.status(400).json({ error: '아이디 또는 비밀번호가 올바르지 않습니다.' });
-
-    res.json({
-        success: true,
-        user: {
-            id: user.id,
-            username: user.username,
-            nickname: user.nickname,
-            name: user.name,
-            school: user.school,
-            student_id: user.student_id
-        }
-    });
+        if (error || !data) return res.status(401).json({ success: false, error: '아이디 또는 비밀번호가 일치하지 않습니다.' });
+        res.json({ success: true, user: data });
+    } catch (err) {
+        res.status(500).json({ success: false, error: '로그인 오류' });
+    }
 });
 
+// 5. 게시글 목록 조회 API
 app.get('/api/posts', async (req, res) => {
-    if (!supabase) return res.status(500).json({ error: 'Supabase 미설정' });
-    const { data, error } = await supabase
-        .from('posts')
-        .select(`*, seller:users!seller_id(id, nickname, school)`)
-        .order('created_at', { ascending: false });
-    
-    if (error) return res.status(400).json({ error: error.message });
-    res.json(data || []);
+    try {
+        const { data, error } = await supabase
+            .from('posts')
+            .select('*, seller:users(nickname)')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.json(data || []);
+    } catch (err) {
+        res.status(500).json([]);
+    }
 });
 
+// 6. 게시글 작성 API
 app.post('/api/posts', async (req, res) => {
-    if (!supabase) return res.status(500).json({ error: 'Supabase 미설정' });
-    const { seller_id, title, content, price, meal_date } = req.body;
-    const { data, error } = await supabase.from('posts').insert([{
-        seller_id, title, content, price, meal_date, status: 'AVAILABLE'
-    }]).select().single();
+    try {
+        const { seller_id, title, meal_date, price, content } = req.body;
+        const { data, error } = await supabase
+            .from('posts')
+            .insert([{ seller_id, title, meal_date, price, content }]);
 
-    if (error) return res.status(400).json({ error: error.message });
-    res.json(data);
+        if (error) throw error;
+        res.json({ success: true });
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.message });
+    }
 });
 
-module.exports = app;
-
-if (process.env.NODE_ENV !== 'production') {
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`서버 포트: ${PORT}`));
-}
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
