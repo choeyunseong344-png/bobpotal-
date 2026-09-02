@@ -7,9 +7,12 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-// Supabase 클라이언트 안전 생성
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
+// Supabase 클라이언트 안전 생성 (URL 유효성 예외 처리)
+const SUPABASE_URL = process.env.SUPABASE_URL && process.env.SUPABASE_URL.startsWith('http')
+    ? process.env.SUPABASE_URL
+    : 'https://placeholder.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_KEY || 'placeholder';
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // 1. 실시간 급식 메뉴 API
