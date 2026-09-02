@@ -18,17 +18,22 @@ try {
     console.error("Supabase Client Initialization Error:", e.message);
 }
 
-// 1. 실시간 급식 메뉴 API (한국 시간 KST 완벽 보정)
+// 1. 실시간 급식 메뉴 API (한국 시간 KST 8자리 완벽 변환)
 app.get('/api/meal', async (req, res) => {
     try {
-        // 한국 시간(KST, UTC+9) 문자열 추출
+        // 한국 표준시(KST) 기준 연/월/일 추출
         const now = new Date();
-        const kstString = now.toLocaleString("en-US", { timeZone: "Asia/Seoul" });
-        const kstDate = new Date(kstString);
-
-        const year = kstDate.getFullYear();
-        const month = String(kstDate.getMonth() + 1).padStart(2, '0');
-        const day = String(kstDate.getDate()).padStart(2, '0');
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Seoul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+        
+        const parts = formatter.formatToParts(now);
+        const year = parts.find(p => p.type === 'year').value;
+        const month = parts.find(p => p.type === 'month').value;
+        const day = parts.find(p => p.type === 'day').value;
         const ymd = `${year}${month}${day}`;
 
         const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=B10&SD_SCHUL_CODE=7010185&MLSV_YMD=${ymd}`;
@@ -49,6 +54,7 @@ app.get('/api/meal', async (req, res) => {
 
         res.json({
             success: true,
+            ymd: ymd,
             lunch: lunch || '오늘 점심 정보가 없습니다.',
             dinner: dinner || '오늘 저녁 정보가 없습니다.'
         });
