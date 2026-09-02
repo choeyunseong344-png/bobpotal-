@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-// Supabase 설정 (Vercel 환경 변수 우선 적용, 없을 경우 안전하게 처리)
+// Supabase 설정 (환경 변수 미등록 시 서버 다운 방지)
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_KEY || 'placeholder';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -48,7 +48,7 @@ app.get('/api/meal', async (req, res) => {
     }
 });
 
-// 2. 아이디/닉네임 중복확인 API
+// 2. 아이디/닉네임 중복확인 API (DB 예외 처리 수정)
 app.post('/api/check-duplicate', async (req, res) => {
     const { field, value } = req.body;
     try {
@@ -64,11 +64,12 @@ app.post('/api/check-duplicate', async (req, res) => {
         }
         res.json({ available: true, message: `사용 가능한 ${field === 'username' ? '아이디' : '닉네임'}입니다.` });
     } catch (err) {
-        res.status(500).json({ available: false, message: 'DB 확인 오류' });
+        console.error('Check Duplicate Error:', err.message);
+        res.status(400).json({ available: false, message: `DB 확인 오류: ${err.message}` });
     }
 });
 
-// 3. 회원가입 API
+// 3. 회원가입 API (상세 DB 에러 전달로 수정)
 app.post('/api/register', async (req, res) => {
     try {
         const { username, nickname, password, name, phone, school, student_id } = req.body;
@@ -76,10 +77,14 @@ app.post('/api/register', async (req, res) => {
             .from('users')
             .insert([{ username, nickname, password, name, phone, school, student_id }]);
 
-        if (error) throw error;
+        if (error) {
+            console.error('Register Supabase Error:', error);
+            return res.status(400).json({ success: false, error: error.message });
+        }
         res.json({ success: true });
     } catch (err) {
-        res.status(400).json({ success: false, error: err.message });
+        console.error('Register Server Error:', err);
+        res.status(500).json({ success: false, error: err.message });
     }
 });
 
@@ -101,18 +106,30 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// 5. 게시글 목록 조회 API
+// 5. 게시글 목록 조회 API (관계형 조회 실패 시 단일 조회 2차 시도 로직 포함)
 app.get('/api/posts', async (req, res) => {
     try {
-        const { data, error } = await supabase
+        let { data, error } = await supabase
             .from('posts')
             .select('*, seller:users(nickname)')
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        // 외래키(Foreign Key) 미설정으로 실패할 경우 기본 조회로 백업 수행
+        if (error) {
+            console.warn('릴레이션 조회 실패, 단일 조회를 진행합니다:', error.message);
+            const fallback = await supabase
+                .from('posts')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (fallback.error) throw fallback.error;
+            data = fallback.data;
+        }
+
         res.json(data || []);
     } catch (err) {
-        res.status(500).json([]);
+        console.error('Posts Fetch Error:', err.message);
+        res.status(200).json([]); // 서버 500다운을 방지하기 위해 빈 배열 전달
     }
 });
 
@@ -131,16 +148,16 @@ app.post('/api/posts', async (req, res) => {
     }
 });
 
-// SPA 라우팅 지원 (HTML 페이지 반환)
+// SPA 라우팅 지원
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// 로컬 테스트 환경에서만 app.listen 실행
+// 로컬 환경 전용 실행
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }
 
-// Vercel 서버리스 핸들러용 Export (필수)
+// Vercel 서버리스 모듈 내보내기
 module.exports = app;
