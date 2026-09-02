@@ -15,13 +15,16 @@ const SUPABASE_KEY = process.env.SUPABASE_KEY || 'placeholder';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 1. 실시간 급식 메뉴 API
+// 1. 실시간 급식 메뉴 API (한국 시간 KST 시차 보정 적용)
 app.get('/api/meal', async (req, res) => {
     try {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
+        // Vercel 서버(UTC) 기준 시간을 한국 시간(KST, UTC+9)으로 보정
+        const now = new Date();
+        const kstDate = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+        
+        const year = kstDate.getUTCFullYear();
+        const month = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(kstDate.getUTCDate()).padStart(2, '0');
         const ymd = `${year}${month}${day}`;
 
         const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=B10&SD_SCHUL_CODE=7010185&MLSV_YMD=${ymd}`;
