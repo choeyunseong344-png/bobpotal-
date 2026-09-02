@@ -7,24 +7,28 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-// Supabase 클라이언트 안전 생성 (URL 유효성 예외 처리)
-const SUPABASE_URL = process.env.SUPABASE_URL && process.env.SUPABASE_URL.startsWith('http')
-    ? process.env.SUPABASE_URL
-    : 'https://placeholder.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'placeholder';
+// Supabase 환경변수 검증 및 안전한 클라이언트 생성
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://eclhjergytoyonvghbib.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || '';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+let supabase;
+try {
+    supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (e) {
+    console.error("Supabase Client Initialization Error:", e.message);
+}
 
-// 1. 실시간 급식 메뉴 API (한국 시간 KST 시차 보정 적용)
+// 1. 실시간 급식 메뉴 API (한국 시간 KST 완벽 보정)
 app.get('/api/meal', async (req, res) => {
     try {
-        // Vercel 서버(UTC) 기준 시간을 한국 시간(KST, UTC+9)으로 보정
+        // 한국 시간(KST, UTC+9) 문자열 추출
         const now = new Date();
-        const kstDate = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-        
-        const year = kstDate.getUTCFullYear();
-        const month = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(kstDate.getUTCDate()).padStart(2, '0');
+        const kstString = now.toLocaleString("en-US", { timeZone: "Asia/Seoul" });
+        const kstDate = new Date(kstString);
+
+        const year = kstDate.getFullYear();
+        const month = String(kstDate.getMonth() + 1).padStart(2, '0');
+        const day = String(kstDate.getDate()).padStart(2, '0');
         const ymd = `${year}${month}${day}`;
 
         const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&ATPT_OFCDC_SC_CODE=B10&SD_SCHUL_CODE=7010185&MLSV_YMD=${ymd}`;
@@ -58,6 +62,10 @@ app.post('/api/check-duplicate', async (req, res) => {
     const { field, value } = req.body;
     if (!field || !value) {
         return res.status(400).json({ available: false, message: '필드와 값이 필요합니다.' });
+    }
+
+    if (!supabase || !SUPABASE_KEY) {
+        return res.status(500).json({ available: false, message: 'Vercel에 SUPABASE_KEY가 설정되지 않았습니다.' });
     }
 
     try {
