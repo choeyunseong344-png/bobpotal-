@@ -7,12 +7,12 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-// Supabase 클라이언트 생성
+// Supabase 클라이언트 안전 생성
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
 const SUPABASE_KEY = process.env.SUPABASE_KEY || 'placeholder';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 1. 서라벌고등학교 실시간 급식 메뉴 API
+// 1. 실시간 급식 메뉴 API
 app.get('/api/meal', async (req, res) => {
     try {
         const today = new Date();
@@ -47,13 +47,11 @@ app.get('/api/meal', async (req, res) => {
     }
 });
 
-// 2. 아이디/닉네임 중복확인 API (500 에러 방지 처리)
+// 2. 아이디/닉네임 중복확인 API
 app.post('/api/check-duplicate', async (req, res) => {
     const { field, value } = req.body;
-    
-    // 유효성 검사
     if (!field || !value) {
-        return res.status(400).json({ available: false, message: '검색 필드와 값이 필요합니다.' });
+        return res.status(400).json({ available: false, message: '필드와 값이 필요합니다.' });
     }
 
     try {
@@ -62,20 +60,14 @@ app.post('/api/check-duplicate', async (req, res) => {
             .select('id')
             .eq(field, value);
 
-        if (error) {
-            console.error('Check Duplicate Supabase Error:', error.message);
-            // DB 컬럼이 없거나 RLS 오류 시 500 대신 안내 메시지 반환
-            return res.json({ available: false, message: `DB 확인 중 오류가 발생했습니다: ${error.message}` });
-        }
+        if (error) throw error;
 
         if (data && data.length > 0) {
             return res.json({ available: false, message: `이미 사용 중인 ${field === 'username' ? '아이디' : '닉네임'}입니다.` });
         }
-
-        return res.json({ available: true, message: `사용 가능한 ${field === 'username' ? '아이디' : '닉네임'}입니다.` });
+        res.json({ available: true, message: `사용 가능한 ${field === 'username' ? '아이디' : '닉네임'}입니다.` });
     } catch (err) {
-        console.error('Check Duplicate Server Error:', err);
-        return res.json({ available: false, message: '서버 내부 처리 오류가 발생했습니다.' });
+        res.status(200).json({ available: false, message: `DB 확인 오류: ${err.message}` });
     }
 });
 
@@ -88,7 +80,6 @@ app.post('/api/register', async (req, res) => {
             .insert([{ username, nickname, password, name, phone, school, student_id }]);
 
         if (error) {
-            console.error('Register Error:', error.message);
             return res.status(400).json({ success: false, error: error.message });
         }
         res.json({ success: true });
@@ -97,29 +88,23 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// 4. 로그인 API (401 오류 원인 방지 및 예외 처리)
+// 4. 로그인 API
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        
-        if (!username || !password) {
-            return res.status(400).json({ success: false, error: '아이디와 비밀번호를 모두 입력해주세요.' });
-        }
-
         const { data, error } = await supabase
             .from('users')
             .select('*')
             .eq('username', username)
             .eq('password', password)
-            .maybeSingle(); // single() 대신 maybeSingle() 사용으로 0건 조회 시 Crash 방지
+            .maybeSingle();
 
         if (error || !data) {
             return res.status(401).json({ success: false, error: '아이디 또는 비밀번호가 일치하지 않습니다.' });
         }
-        
         res.json({ success: true, user: data });
     } catch (err) {
-        res.status(500).json({ success: false, error: '로그인 처리 중 오류가 발생했습니다.' });
+        res.status(500).json({ success: false, error: '로그인 처리 오류' });
     }
 });
 
@@ -132,7 +117,6 @@ app.get('/api/posts', async (req, res) => {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.warn('릴레이션 조회 실패, 단일 조회를 시도합니다:', error.message);
             const fallback = await supabase
                 .from('posts')
                 .select('*')
@@ -144,7 +128,6 @@ app.get('/api/posts', async (req, res) => {
 
         res.json(data || []);
     } catch (err) {
-        console.error('Posts Fetch Error:', err.message);
         res.status(200).json([]);
     }
 });
@@ -169,7 +152,7 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// 로컬 테스트용
+// 로컬 환경 실행 전용
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
