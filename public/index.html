@@ -380,7 +380,6 @@
         let currentUser = null;
         let checkedStatus = { username: false, nickname: false };
 
-        // 페이지 로드 시 초기화
         window.onload = function() {
             fetchMeal();
             fetchPosts();
@@ -389,7 +388,6 @@
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-        // 1. 급식 조회
         function fetchMeal() {
             fetch('/api/meal')
                 .then(res => res.json())
@@ -403,7 +401,6 @@
                 });
         }
 
-        // 2. 중복 확인
         function checkDuplicate(field) {
             const inputVal = document.getElementById(`reg-${field}`).value.trim();
             const msgEl = document.getElementById(`msg-${field}`);
@@ -430,13 +427,12 @@
                     checkedStatus[field] = false;
                 }
             })
-            .catch(err => {
-                msgEl.innerText = '서버 연결 실패 (Vercel 환경변수 및 DB 확인 필요)';
+            .catch(() => {
+                msgEl.innerText = '서버 연결 실패';
                 msgEl.className = 'msg-text msg-error';
             });
         }
 
-        // 3. 회원가입
         function handleRegister(e) {
             e.preventDefault();
             if (!checkedStatus.username || !checkedStatus.nickname) {
@@ -472,7 +468,6 @@
             .catch(() => alert('가입 처리 중 오류가 발생했습니다.'));
         }
 
-        // 4. 로그인
         function handleLogin(e) {
             e.preventDefault();
             const body = {
@@ -502,7 +497,6 @@
             .catch(() => alert('로그인 처리 중 오류가 발생했습니다.'));
         }
 
-        // 5. 게시글 목록 불러오기
         function fetchPosts() {
             fetch('/api/posts')
                 .then(res => res.json())
