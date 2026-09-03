@@ -3,182 +3,444 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>밥포탈 (bobpotal)</title>
+    <title>밥포탈 (bobpotal) - 서라벌고 급식 & 거래</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans KR', sans-serif; }
-        body { background-color: #f4f6f8; color: #333; line-height: 1.6; }
-        
-        header { background: #fff; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e1e4e8; }
-        .logo { font-size: 1.5rem; font-weight: bold; color: #4F46E5; cursor: pointer; }
-        #auth-buttons button { margin-left: 0.5rem; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #4F46E5; background: #fff; color: #4F46E5; cursor: pointer; font-weight: bold; }
-        #auth-buttons button:last-child { background: #4F46E5; color: #fff; }
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text: #1F2937;
+            --subtext: #6B7280;
+            --border: #E5E7EB;
+        }
 
-        main { max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-        
-        .meal-container, .board-container { background: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem; }
-        .meal-container h2, .board-header h2 { font-size: 1.2rem; margin-bottom: 1rem; color: #111; }
-        .meal-box { display: flex; gap: 1rem; }
-        .meal-item { flex: 1; background: #f9fafb; padding: 1rem; border-radius: 8px; border: 1px solid #edf2f7; }
-        .meal-item h3 { font-size: 1rem; color: #4F46E5; margin-bottom: 0.5rem; }
-        .meal-item p { font-size: 0.95rem; white-space: pre-wrap; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
 
-        .board-header { display: flex; justify-content: space-between; align-items: center; }
-        .board-header button { padding: 0.4rem 0.8rem; background: #4F46E5; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
-        .post-item { padding: 1rem 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; }
-        .modal-content { background: #fff; width: 90%; max-width: 400px; margin: 10% auto; padding: 2rem; border-radius: 10px; position: relative; }
-        .close { position: absolute; right: 1.2rem; top: 1rem; font-size: 1.5rem; cursor: pointer; }
-        .modal-content h2 { margin-bottom: 1.5rem; }
-        .modal-content input { width: 100%; padding: 0.7rem; margin-bottom: 0.8rem; border: 1px solid #ccc; border-radius: 6px; }
-        .input-group { display: flex; gap: 0.5rem; }
-        .input-group input { flex: 1; }
-        .input-group button { padding: 0.7rem; height: 42px; background: #374151; color: #fff; border: none; border-radius: 6px; cursor: pointer; white-space: nowrap; }
-        .submit-btn { width: 100%; padding: 0.8rem; background: #4F46E5; color: #fff; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 0.5rem; }
-        .error-msg { font-size: 0.8rem; margin-top: -0.5rem; margin-bottom: 0.8rem; }
+        /* Header */
+        header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .auth-buttons button {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            margin-left: 0.5rem;
+        }
+
+        .btn-login {
+            background: transparent;
+            color: var(--text);
+        }
+
+        .btn-register {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-register:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            width: 100%;
+        }
+
+        /* Meal Section */
+        .meal-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .meal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .meal-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .meal-card {
+            background: #F9FAFB;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .meal-card h4 {
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .meal-card p {
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--subtext);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .input-with-btn {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus {
+            outline: 2px solid var(--primary);
+        }
+
+        .btn-sub {
+            padding: 0.6rem;
+            background: #374151;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 0.85rem;
+        }
+
+        .btn-full {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .btn-full:hover {
+            background: var(--primary-hover);
+        }
+
+        .msg-text {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+        .msg-error { color: #EF4444; }
+        .msg-success { color: #10B981; }
+
+        /* Post Section */
+        .posts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .post-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .post-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .post-info p {
+            font-size: 0.85rem;
+            color: var(--subtext);
+        }
+
+        .post-price {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
+
     <header>
-        <div class="logo" onclick="location.reload()">밥포탈</div>
-        <div id="auth-buttons">
-            <button onclick="openModal('login-modal')">로그인</button>
-            <button onclick="openModal('register-modal')">회원가입</button>
+        <div class="logo" onclick="location.reload()">밥포탈 (bobpotal)</div>
+        <div class="auth-buttons" id="auth-area">
+            <button class="btn-login" onclick="openModal('login-modal')">로그인</button>
+            <button class="btn-register" onclick="openModal('register-modal')">회원가입</button>
         </div>
     </header>
 
-    <main>
-        <section class="meal-container">
-            <h2>서라벌고등학교 오늘의 급식</h2>
-            <div class="meal-box">
-                <div class="meal-item">
-                    <h3>☀️ 점심 (중식)</h3>
-                    <p id="lunch-menu">불러오는 중...</p>
+    <div class="container">
+        <!-- 급식 섹션 -->
+        <section class="meal-section">
+            <div class="meal-title">
+                <span>🍱 오늘의 서라벌고 급식</span>
+            </div>
+            <div class="meal-grid">
+                <div class="meal-card">
+                    <h4>☀️ 점심 (중식)</h4>
+                    <p id="lunch-text">급식 정보를 불러오는 중...</p>
                 </div>
-                <div class="meal-item">
-                    <h3>🌙 저녁 (석식)</h3>
-                    <p id="dinner-menu">불러오는 중...</p>
+                <div class="meal-card">
+                    <h4>🌙 저녁 (석식)</h4>
+                    <p id="dinner-text">급식 정보를 불러오는 중...</p>
                 </div>
             </div>
         </section>
 
-        <section class="board-container">
-            <div class="board-header">
-                <h2>급식 거래 게시판</h2>
-                <button onclick="openModal('write-modal')">글쓰기</button>
+        <!-- 게시글 목록 섹션 -->
+        <section>
+            <div class="posts-header">
+                <h2>급식 교환 / 거래</h2>
+                <button class="btn-register" style="padding: 0.5rem 1rem;" onclick="openWriteModal()">글쓰기</button>
             </div>
-            <div id="posts-list"></div>
+            <div id="posts-list">
+                <p style="color: var(--subtext); text-align: center; padding: 2rem;">게시글을 불러오는 중입니다...</p>
+            </div>
         </section>
-    </main>
+    </div>
 
-    <!-- 회원가입 모달 -->
-    <div id="register-modal" class="modal">
+    <!-- 로그인 모달 -->
+    <div class="modal" id="login-modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('register-modal')">&times;</span>
-            <h2>회원가입</h2>
-            <form id="register-form" onsubmit="handleRegister(event)">
-                <div class="input-group">
-                    <input type="text" id="reg-username" placeholder="아이디" required>
-                    <button type="button" onclick="checkDuplicate('username')">중복확인</button>
+            <button class="close-btn" onclick="closeModal('login-modal')">&times;</button>
+            <h2 style="margin-bottom: 1.5rem;">로그인</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>아이디</label>
+                    <input type="text" id="login-username" required>
                 </div>
-                <p id="msg-username" class="error-msg"></p>
-
-                <div class="input-group">
-                    <input type="text" id="reg-nickname" placeholder="닉네임" required>
-                    <button type="button" onclick="checkDuplicate('nickname')">중복확인</button>
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" id="login-password" required>
                 </div>
-                <p id="msg-nickname" class="error-msg"></p>
-
-                <input type="password" id="reg-password" placeholder="비밀번호" required>
-                <input type="text" id="reg-name" placeholder="이름" required>
-                <input type="text" id="reg-phone" placeholder="전화번호" required>
-                <input type="text" id="reg-student-id" placeholder="학번" required>
-
-                <button type="submit" class="submit-btn">가입하기</button>
+                <button type="submit" class="btn-full">로그인</button>
             </form>
         </div>
     </div>
 
-    <!-- 로그인 모달 -->
-    <div id="login-modal" class="modal">
+    <!-- 회원가입 모달 -->
+    <div class="modal" id="register-modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('login-modal')">&times;</span>
-            <h2>로그인</h2>
-            <form onsubmit="handleLogin(event)">
-                <input type="text" id="login-username" placeholder="아이디" required>
-                <input type="password" id="login-password" placeholder="비밀번호" required>
-                <button type="submit" class="submit-btn">로그인</button>
+            <button class="close-btn" onclick="closeModal('register-modal')">&times;</button>
+            <h2 style="margin-bottom: 1.5rem;">회원가입</h2>
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>아이디</label>
+                    <div class="input-with-btn">
+                        <input type="text" id="reg-username" required>
+                        <button type="button" class="btn-sub" onclick="checkDuplicate('username')">중복확인</button>
+                    </div>
+                    <div id="msg-username" class="msg-text"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>닉네임</label>
+                    <div class="input-with-btn">
+                        <input type="text" id="reg-nickname" required>
+                        <button type="button" class="btn-sub" onclick="checkDuplicate('nickname')">중복확인</button>
+                    </div>
+                    <div id="msg-nickname" class="msg-text"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>비밀번호</label>
+                    <input type="password" id="reg-password" required>
+                </div>
+
+                <div class="form-group">
+                    <label>이름</label>
+                    <input type="text" id="reg-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>전화번호</label>
+                    <input type="text" id="reg-phone" placeholder="01012345678" required>
+                </div>
+
+                <div class="form-group">
+                    <label>학번</label>
+                    <input type="text" id="reg-student-id" placeholder="예: 10424" required>
+                </div>
+
+                <button type="submit" class="btn-full">가입하기</button>
             </form>
         </div>
     </div>
 
     <script>
-        let isUsernameChecked = false;
-        let isNicknameChecked = false;
         let currentUser = null;
+        let checkedStatus = { username: false, nickname: false };
 
+        // 페이지 로드 시 초기화
         window.onload = function() {
-            loadMeal();
-            loadPosts();
+            fetchMeal();
+            fetchPosts();
         };
 
-        function openModal(id) { document.getElementById(id).style.display = 'block'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-        // 급식 불러오기
-        function loadMeal() {
+        // 1. 급식 조회
+        function fetchMeal() {
             fetch('/api/meal')
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById('lunch-menu').innerText = data.lunch || '오늘 점심 정보가 없습니다.';
-                    document.getElementById('dinner-menu').innerText = data.dinner || '오늘 저녁 정보가 없습니다.';
+                    document.getElementById('lunch-text').innerText = data.lunch || '오늘 점심 정보가 없습니다.';
+                    document.getElementById('dinner-text').innerText = data.dinner || '오늘 저녁 정보가 없습니다.';
                 })
                 .catch(() => {
-                    document.getElementById('lunch-menu').innerText = '급식 정보를 불러올 수 없습니다.';
-                    document.getElementById('dinner-menu').innerText = '급식 정보를 불러올 수 없습니다.';
+                    document.getElementById('lunch-text').innerText = '급식 정보를 불러올 수 없습니다.';
+                    document.getElementById('dinner-text').innerText = '급식 정보를 불러올 수 없습니다.';
                 });
         }
 
-        // 중복확인 (오류 완벽 방지)
+        // 2. 중복 확인
         function checkDuplicate(field) {
-            const val = document.getElementById(`reg-${field}`).value.trim();
+            const inputVal = document.getElementById(`reg-${field}`).value.trim();
             const msgEl = document.getElementById(`msg-${field}`);
 
-            if (!val) {
-                msgEl.innerText = '입력해 주세요.';
-                msgEl.style.color = 'red';
+            if (!inputVal) {
+                msgEl.innerText = '값을 입력해 주세요.';
+                msgEl.className = 'msg-text msg-error';
                 return;
             }
 
             fetch('/api/check-duplicate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ field: field, value: val })
+                body: JSON.stringify({ field: field, value: inputVal })
             })
             .then(res => res.json())
             .then(data => {
-                msgEl.innerText = data.message;
+                msgEl.innerText = data.message || (data.available ? '사용 가능합니다.' : '이미 사용 중입니다.');
                 if (data.available) {
-                    msgEl.style.color = 'green';
-                    if (field === 'username') isUsernameChecked = true;
-                    if (field === 'nickname') isNicknameChecked = true;
+                    msgEl.className = 'msg-text msg-success';
+                    checkedStatus[field] = true;
                 } else {
-                    msgEl.style.color = 'red';
-                    if (field === 'username') isUsernameChecked = false;
-                    if (field === 'nickname') isNicknameChecked = false;
+                    msgEl.className = 'msg-text msg-error';
+                    checkedStatus[field] = false;
                 }
             })
-            .catch(() => {
-                msgEl.innerText = 'DB 확인 오류: Vercel 환경변수를 확인하세요.';
-                msgEl.style.color = 'red';
+            .catch(err => {
+                msgEl.innerText = '서버 연결 실패 (Vercel 환경변수 및 DB 확인 필요)';
+                msgEl.className = 'msg-text msg-error';
             });
         }
 
-        // 회원가입
+        // 3. 회원가입
         function handleRegister(e) {
             e.preventDefault();
-            if (!isUsernameChecked || !isNicknameChecked) {
-                alert('아이디와 닉네임 중복확인을 해주세요.');
+            if (!checkedStatus.username || !checkedStatus.nickname) {
+                alert('아이디와 닉네임 중복확인을 모두 진행해 주세요.');
                 return;
             }
 
@@ -200,25 +462,28 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    alert('회원가입 성공!');
+                    alert('회원가입이 완료되었습니다! 로그인해 주세요.');
                     closeModal('register-modal');
                     openModal('login-modal');
                 } else {
-                    alert('가입 실패: ' + data.error);
+                    alert('가입 실패: ' + (data.error || '오류 발생'));
                 }
-            });
+            })
+            .catch(() => alert('가입 처리 중 오류가 발생했습니다.'));
         }
 
-        // 로그인
+        // 4. 로그인
         function handleLogin(e) {
             e.preventDefault();
+            const body = {
+                username: document.getElementById('login-username').value,
+                password: document.getElementById('login-password').value
+            };
+
             fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    username: document.getElementById('login-username').value,
-                    password: document.getElementById('login-password').value
-                })
+                body: JSON.stringify(body)
             })
             .then(res => res.json())
             .then(data => {
@@ -226,30 +491,51 @@
                     currentUser = data.user;
                     alert(`${currentUser.nickname}님 환영합니다!`);
                     closeModal('login-modal');
-                    document.getElementById('auth-buttons').innerHTML = `<span>${currentUser.nickname}님</span> <button onclick="location.reload()">로그아웃</button>`;
+                    document.getElementById('auth-area').innerHTML = `
+                        <span style="font-weight: 600; margin-right: 0.5rem;">${currentUser.nickname}님</span>
+                        <button class="btn-login" onclick="location.reload()">로그아웃</button>
+                    `;
                 } else {
-                    alert(data.error);
+                    alert(data.error || '로그인에 실패했습니다.');
                 }
-            });
+            })
+            .catch(() => alert('로그인 처리 중 오류가 발생했습니다.'));
         }
 
-        // 게시글 목록
-        function loadPosts() {
+        // 5. 게시글 목록 불러오기
+        function fetchPosts() {
             fetch('/api/posts')
                 .then(res => res.json())
                 .then(data => {
-                    const list = document.getElementById('posts-list');
-                    if (!data || data.length === 0) {
-                        list.innerHTML = '<p>등록된 게시물이 없습니다.</p>';
+                    const container = document.getElementById('posts-list');
+                    if (!data || !Array.isArray(data) || data.length === 0) {
+                        container.innerHTML = '<p style="color: var(--subtext); text-align: center; padding: 2rem;">등록된 게시글이 없습니다.</p>';
                         return;
                     }
-                    list.innerHTML = data.map(post => `
-                        <div class="post-item">
-                            <h4>${post.title}</h4>
-                            <p>${post.price}원 | ${post.meal_date}</p>
+
+                    container.innerHTML = data.map(post => `
+                        <div class="post-card">
+                            <div class="post-info">
+                                <h3>${post.title || '제목 없음'}</h3>
+                                <p>날짜: ${post.meal_date || '-'} | 작성자: ${post.seller ? post.seller.nickname : '익명'}</p>
+                            </div>
+                            <div class="post-price">${Number(post.price || 0).toLocaleString()}원</div>
                         </div>
                     `).join('');
+                })
+                .catch(() => {
+                    const container = document.getElementById('posts-list');
+                    container.innerHTML = '<p style="color: var(--subtext); text-align: center; padding: 2rem;">게시글을 불러올 수 없습니다.</p>';
                 });
+        }
+
+        function openWriteModal() {
+            if (!currentUser) {
+                alert('로그인 후 이용할 수 있습니다.');
+                openModal('login-modal');
+                return;
+            }
+            alert('글쓰기 기능이 열립니다.');
         }
     </script>
 </body>
